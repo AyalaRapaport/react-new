@@ -1,0 +1,11 @@
+#map {
+    /* overflow: visible !important;
+    height: '50vh' !important;
+    width: '50%' !important; */
+    float: right;
+    margin-top: 10vb;
+    margin-right: 5vb;
+}
+#map button{
+    width: 4vw !important;
+}

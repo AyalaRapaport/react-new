@@ -1,0 +1,39 @@
+.mycard {
+    height: 30vh;
+    flex-direction: row;
+    display: flex;
+    width: 30%;
+    margin-bottom: 20px;
+    padding: 0.75rem;
+    background-color: rgb(255, 255, 255);
+    cursor: pointer;
+    transition: transform 0.3s ease;
+    border-radius:5%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); 
+
+}
+
+.product {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10vb;
+}
+
+.mycard:hover {
+    transform: scale(1.03) translateZ(0px);
+}
+
+.plus {
+    border: none;
+    background-color: #ebf7fd;
+    position: absolute;
+    // background-color: #add8e6;
+    width: 7vb;
+    height: 7vb;
+    border-radius: 0 0 70% 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #00c4e7;
+}

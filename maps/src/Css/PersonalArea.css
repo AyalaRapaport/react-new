@@ -1,0 +1,21 @@
+#inputId {
+    width:50%;
+    margin-bottom: 20px;
+    padding: 12px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+}
+
+#labelId {
+    margin-bottom: 10px;
+    display: block;
+}
+#login{
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    width: 40%;
+}
+.ToggleButtonGroup{
+    width: 20vb;
+}
