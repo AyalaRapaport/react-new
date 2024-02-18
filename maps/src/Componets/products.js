@@ -14,51 +14,33 @@ export default function Products() {
     const products = useSelector(state => state.products.products);
     const theme = useTheme();
     const nav = useNavigate();
-    const [img, setImg] = useState([]);
+    // const [img, setImg] = useState([]);
     const images = useSelector(state => state.products.images);
     useEffect(() => {
         dispatch(getProduct());
     }, [])
 
-    // useEffect(() => {
-    //     console.log(products.length);
-    // }, [products])
-
-    // useEffect(() => {
-    //     if (images.length > 1) {
-    //         console.log("0"+images[0]);
-    //         console.log("1"+images[1]);
-    //         console.log("2"+images[2]);
-    //         console.log("3"+images[3]);
-
-    //     }
-
-    // }, [images]);
+    const [hasLoadedImages, setHasLoadedImages] = useState(false);
 
     useEffect(() => {
-        if (products.length ===3) {
+        if (products.length === 3 && !hasLoadedImages) {
+            setHasLoadedImages(true);
             products.forEach(product => {
-                console.log(product.urlImage);
-                dispatch(getImage(product.urlImage))
-                // .then((img1) => {
-                //     console.log(images);
-                // }).catch((error) => {
-                //     console.error(error);
-                // });
+                dispatch(getImage(product.urlImage));
             });
         }
-    }, [products]);
+    }, [products, hasLoadedImages]);
+
 
     return (
         <div className='product'>
-            {products&&products.map(product => (
+            {products.length===3 &&images.length>2&& products.map(product => (
                 <div className='mycard' key={product.id}>
                     <button className='plus'> +</button>
                     {<CardMedia
                         className='productImg'
                         component="img"
-                        // image={product.imageUrl} // אנו משתמשים ב-URL של התמונה שנמצא במשתנה imageUrl
-                        image={images[product.id+1]}
+                        image={images[product.id-1]}
                         alt={product.name}
                         style={{ width: '40%', height: '25vh', objectFit: 'cover' }}
                     />}

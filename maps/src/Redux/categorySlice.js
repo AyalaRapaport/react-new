@@ -3,7 +3,7 @@ import axios from 'axios';
 
 const initialState = {
     categories: [{}],
-    images: [{}],
+    imagesC: [],
     status: 'init',
     imgStatus:'init'
 }
@@ -14,7 +14,7 @@ export const getCategory = createAsyncThunk(
         try {
             const response = await axios.get('https://localhost:7229/api/Category');
             if (response.status === 200) {
-                console.log(response.data);
+                // console.log(response.data);
                 return response.data;
             }
         } catch (error) {
@@ -23,13 +23,12 @@ export const getCategory = createAsyncThunk(
         }
     }
 );
-export const getImage = createAsyncThunk(
+export const getImageC = createAsyncThunk(
     'getImage',
     async (urlImage) => {
         try {
-            console.log(urlImage);
             const response = await axios.get(`https://localhost:7229/api/Category/getImage/${urlImage.toString()}`)
-            console.log(response.data);
+            // console.log(response.data);
             return response.data;
 
         } catch (error) {
@@ -52,9 +51,9 @@ export const categorySlice = createSlice({
             state.status = 'fulfilled'
             state.categories = action.payload
         })
-        builder.addCase(getImage.fulfilled, (state, action) => {
+        builder.addCase(getImageC.fulfilled, (state, action) => {
             state.imgStatus = 'fulfilled'
-            state.images.push(action.payload);
+            state.imagesC.push(action.payload);
             // console.log("imagge" + state.images);
 
         })

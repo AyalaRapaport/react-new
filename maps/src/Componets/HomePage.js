@@ -13,7 +13,7 @@ const HomePage = () => {
         <Link to={'/courierDetails'}> <button id='toCourierBtn'>הצטרפות לשליחים  </button></Link>
         <div id='back'>
         <img alt='background' id='background' src={background} /></div>
-        {/* <Categories/> */}
+        <Categories/>
         <Products/>
     </>);
 }

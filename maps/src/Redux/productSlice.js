@@ -3,14 +3,14 @@ import axios from 'axios';
 
 const initialState = {
     products: [{}],
-    images: [],
+    images:[],
     status: 'init',
-    imgStatus:'init'
+    imgStatus: 'init'
 }
 
 export const getProduct = createAsyncThunk(
     'getProduct',
-    async (thunkAPI) => {
+    async () => {
         try {
             const response = await axios.get('https://localhost:7229/api/Product');
             if (response.status === 200) {
@@ -18,7 +18,7 @@ export const getProduct = createAsyncThunk(
             }
         } catch (error) {
             console.log(error);
-            return thunkAPI.rejectWithValue(error.message);
+            return(error.message);
         }
     }
 );
@@ -26,7 +26,6 @@ export const getImage = createAsyncThunk(
     'getImage',
     async (urlImage) => {
         try {
-            console.log(urlImage);
             const response = await axios.get(`https://localhost:7229/api/Product/getImage/${urlImage.toString()}`)
             // console.log(response.data);
             return response.data;
@@ -85,7 +84,6 @@ export const productSlice = createSlice({
         builder.addCase(getImage.fulfilled, (state, action) => {
             state.imgStatus = 'fulfilled'
             state.images.push(action.payload);
-
         })
 
     },
