@@ -1,11 +1,13 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
+import { act } from 'react-dom/test-utils';
 
 const initialState = {
-    products: [{}],
-    images:[],
+    products: [],
+    images: [],
     status: 'init',
-    imgStatus: 'init'
+    imgStatus: 'init',
+    product: ''
 }
 
 export const getProduct = createAsyncThunk(
@@ -18,15 +20,76 @@ export const getProduct = createAsyncThunk(
             }
         } catch (error) {
             console.log(error);
-            return(error.message);
+            return (error.message);
         }
     }
 );
+export const getProductById = createAsyncThunk(
+    'getProductById',
+    async (Id) => {
+        try {
+            const response = await axios.get(`https://localhost:7229/api/Product/${Id}`);
+            if (response.status === 200) {
+                return response.data;
+            }
+        } catch (error) {
+            console.log(error);
+            return (error.message);
+        }
+    }
+);
+
 export const getImage = createAsyncThunk(
     'getImage',
-    async (urlImage) => {
+    async (product) => {
         try {
-            const response = await axios.get(`https://localhost:7229/api/Product/getImage/${urlImage.toString()}`)
+            const response = await axios.get(`https://localhost:7229/api/Product/getImage/${product.urlImage.toString()}`)
+            // console.log(response.data);
+            const image = {img: response.data,id:product.id };
+            return image;
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+)
+export const addProduct = createAsyncThunk(
+    'addProduct',
+    async (product) => {
+        try {
+            const response = await axios.post(`https://localhost:7229/api/Product}`,
+                {
+                    Name: product.Name,
+                    Price: product.Price,
+                    Description: product.Description,
+                    CategoryId: product.CategoryId,
+                    StoreId: product.StoreId,
+                    Image: product.Image,
+                    UrlImage: product.UrlImage
+                })
+            // console.log(response.data);
+            return response.data;
+
+        } catch (error) {
+            console.log(error);
+        }
+    }
+)
+export const updateProduct = createAsyncThunk(
+    'updateProduct',
+    async (product) => {
+        console.log(product);
+        console.log( (product.Image));
+        try {
+            const response = await axios.put(`https://localhost:7229/api/Product/${product.Id}`, {
+                Name: product.name,
+                Price: product.price,
+                Description: product.description,
+                CategoryId: product.categoryId,
+                StoreId: product.storeId,
+                Image: product.image,
+                UrlImage: product.urlImage
+            })
             // console.log(response.data);
             return response.data;
 
@@ -36,42 +99,8 @@ export const getImage = createAsyncThunk(
     }
 )
 
-// export const setDetails = createAsyncThunk(
-//     'setDetails',
-//     async (courier, thunkAPI) => {
-//         try {
-//             const response = await axios.put(`https://localhost:7229/api/Courier/${courier.IdCourier}`, {
-//                 IdCourier: courier.IdCourier,
-//             });
-//             if (response.status === 200) {
-//                 return response.data;
-//             }
-//         } catch (error) {
-//             return (error.message);
-//         }
-//     }
-// );
-
-// export const addCourier = createAsyncThunk(
-//     'couriers/addCourier',
-//     async (courier) => {
-//         try {
-//             const response = await axios.post('https://localhost:7229/api/Courier', {
-//                 idCourier: courier.IdCourier,
-//                 lastShipment: courier.Date
-
-//             });
-//             if (response.status === 200) {
-//                 return response.data;
-//             } 
-//         }
-//         catch (error) {
-//             return (error.message);
-//         }
-//     });
-
 export const productSlice = createSlice({
-    name: 'courier',
+    name: 'product',
     initialState,
     reducers: {
 
@@ -85,28 +114,13 @@ export const productSlice = createSlice({
             state.imgStatus = 'fulfilled'
             state.images.push(action.payload);
         })
+        builder.addCase(getProductById.fulfilled, (state, action) => {
+            state.product = action.payload;
+        })
 
     },
 }
 )
-// extraReducers: (builder) => {
-//     builder.addCase(getProduct.fulfilled, (state, action) => {
-//         state.status = 'fulfilled'
-//         state.products = action.payload.map(product => ({
-//             ...product,
-//             imageUrl: null // נוסיף מאפיין זה למוצרים
-//         }));
-//     })
-//     builder.addCase(getImage.fulfilled, (state, action) => {
-//         state.imgStatus = 'fulfilled';
-//         const { productId, imageUrl } = action.payload;
-//         const productIndex = state.products.findIndex(product => product.id === productId);
-//         if (productIndex !== -1) {
-//             state.products[productIndex].imageUrl = imageUrl;
-//         }
-//     })
-// },
-// });
 export const { } = productSlice.actions
 
 export default productSlice.reducer

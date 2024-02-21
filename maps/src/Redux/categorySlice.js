@@ -5,7 +5,7 @@ const initialState = {
     categories: [{}],
     imagesC: [],
     status: 'init',
-    imgStatus:'init'
+    imgStatus: 'init'
 }
 
 export const getCategory = createAsyncThunk(
@@ -24,8 +24,9 @@ export const getCategory = createAsyncThunk(
     }
 );
 export const getImageC = createAsyncThunk(
-    'getImage',
+    'getImageC',
     async (urlImage) => {
+
         try {
             const response = await axios.get(`https://localhost:7229/api/Category/getImage/${urlImage.toString()}`)
             // console.log(response.data);
@@ -51,10 +52,12 @@ export const categorySlice = createSlice({
             state.status = 'fulfilled'
             state.categories = action.payload
         })
+        let i = 1;
+
         builder.addCase(getImageC.fulfilled, (state, action) => {
             state.imgStatus = 'fulfilled'
             state.imagesC.push(action.payload);
-            // console.log("imagge" + state.images);
+            // console.log(i++ + state.imagesC);
 
         })
 

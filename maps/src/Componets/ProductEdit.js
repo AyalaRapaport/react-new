@@ -1,74 +1,154 @@
 import React, { useEffect, useState } from 'react';
-import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Input } from '@mui/material';
+import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Input, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProduct } from '../Redux/productSlice';
+import { getProductById, updateProduct } from '../Redux/productSlice';
 import Logo from './Logo';
+import CloseIcon from '@mui/icons-material/Close';
 
-export default function ProductEdit() {
+export default function ProductEdit({ id, edit, handleClose }) {
+    const product = useSelector(state => state.products.product);
     const dispatch = useDispatch();
-    const [name, setName] = useState('Product Name');
-    const [description, setDescription] = useState('Product Description');
+    const [name, setName] = useState('');
+    const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
-    const products = useSelector(state => state.products.products);
-    const handleSave = () => {
-        // Handle saving the edited product details
+    const [isOk, setIsOk] = useState(false);
+    const [open, setOpen] = useState(edit);
+    const [file, setFile] = useState(null);
+    // const [imgName, setImgName] = useState('');
+    const [toUpdate, setToUpdate] = useState(false);
+    const [currProduct, setCurrProduct] = useState({
+        Id: id,
+        Name: '',
+        Price: 0,
+        Description: '',
+        CategoryId: 0,
+        StoreId: 0,
+        Image: '',
+        // UrlImage: ''
+    });
+
+    useEffect(() => {
+        setOpen(edit);
+    }, [edit]);
+
+    useEffect(() => {
+        dispatch(getProductById(id))
+    }, [id]);
+
+    useEffect(() => {
+        if (product) {
+            setName(product.name);
+            setDescription(product.description);
+            setPrice(product.price);
+        }
+    }, [product]);
+
+    const handleSave = (e) => {
+        e.preventDefault();
+        if (!isOk) {
+            alert('יש למלא את כל השדות בצורה תקינה');
+            return;
+        }
+        else {
+            console.log("ok");
+            setCurrProduct({
+                Id: id,
+                Name: name,
+                Price: price,
+                Description: description,
+                CategoryId: 1,
+                StoreId: 1,
+                Image: file.get('Image') 
+                // UrlImage: imgName
+            });
+            setToUpdate(true);
+        }
+
     };
+
     useEffect(() => {
-        dispatch(getProduct());
-    }, [])
-    useEffect(() => {
-        products.map(product => {
-            console.log("ID:", product.id);
-            console.log("Name:", product.name);
-            console.log("Price:", product.price);
-            console.log("Description:", product.description);
-            console.log(); 
-        });   
-    }, [products])
+        if (toUpdate) {
+            dispatch(updateProduct(currProduct))
+            handleClose();
+        }
+    }, [toUpdate]);
 
     const handleImageUpload = (e) => {
-        const file = e.target.files[0];
-        // Handle the selected image file here
-        console.log(file);
+        const selectedFile = e.target.files[0];
+        const formData = new FormData();
+        formData.append('Image', selectedFile);
+        setFile(formData);
     };
 
     return (
         <>
             <Logo />
-            <Dialog open={true} onClose={handleSave}>
-                <DialogTitle>Edit Product Details</DialogTitle>
+            <Dialog open={open} onClose={handleClose} sx={{ maxHeight: '120vh' }} scroll='paper'>
+                <DialogTitle>
+                    עריכת פרטי מוצר
+                    <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
+                        <CloseIcon />
+                    </IconButton>
+                </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        label="Name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                    />
-                    <TextField
-                        label="Description"
-                        value={description}
-                        onChange={(e) => setDescription(e.target.value)}
-                    />
-                    <TextField
-                        label="Price"
-                        type="number"
-                        value={price}
-                        onChange={(e) => setPrice(e.target.value)}
-                    />
-                    <label htmlFor="image-upload"> תמונת פרופיל</label>
-                    <Input
-                        type="file"
-                        onChange={handleImageUpload}
-                        accept="image/*" // Specify accepted file types (images in this case)
-                        sx={{
-                            height: "100px",
-                            bgcolor: "transparent",
-                        }} // Hide the default input style
-                        id="image-upload" // Set a unique id for the input
-                    />
+                    <div style={{ marginBottom: '10px' }}>
+                        <TextField
+                            label="Name"
+                            InputLabelProps={{
+                                style: { fontSize: '1rem' }
+                            }}
+                            value={name}
+                            onChange={(e) => {
+                                setName(e.target.value);
+                                setIsOk(e.target.value?.trim() !== '');
+                            }}
+                            error={name?.trim() === ''}
+                            helperText={name?.trim() === '' ? 'שדה חובה' : ''}
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <TextField
+                            label="Description"
+                            value={description}
+                            onChange={(e) => {
+                                setDescription(e.target.value);
+                                setIsOk(e.target.value?.trim() !== '');
+                            }}
+                            error={description?.trim() === ''}
+                            helperText={description?.trim() === '' ? 'שדה חובה' : ''} />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <TextField
+                            label="Price"
+                            type="number"
+                            value={price}
+                            onChange={(e) => {
+                                setPrice(e.target.value);
+                                setIsOk(e.target.value.trim() !== '');
+                            }}
+                        // error={price?.trim() === ''}
+                        // helperText={price?.trim() === '' ? 'שדה חובה' : ''
+                        />
+                    </div>
+                    <div style={{ marginBottom: '10px' }}>
+                        <label htmlFor="image-upload"> תמונה </label>
+                        <br />
+                        <Input
+                            type="file"
+                            onChange={handleImageUpload}
+                            accept="image/*"
+                            sx={{
+                                height: "100px",
+                                bgcolor: "transparent",
+                            }}
+                            id="image-upload"
+                        />
+                    </div>
                 </DialogContent>
+
                 <DialogActions>
                     <Button onClick={handleSave} color="primary">
-                        Save
+                        שמור
                     </Button>
                 </DialogActions>
             </Dialog>

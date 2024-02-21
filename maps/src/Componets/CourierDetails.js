@@ -88,7 +88,6 @@ const CourierDetails = () => {
     useEffect(() => {
         if (isCorrect) {
             console.log( courier);
-            // if(!dispatch(getDetails(courier.IdCourier)))
             {dispatch(addCourier(courier))
                 .then((response) => {
                     console.log("Response from addCourier:", response);
