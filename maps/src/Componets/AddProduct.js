@@ -1,27 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Input, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProduct, updateProduct } from '../Redux/productSlice';
+import { addProduct } from '../Redux/productSlice';
 import Logo from './Logo';
 import CloseIcon from '@mui/icons-material/Close';
+import { useParams } from 'react-router-dom';
 
-export default function ProductEdit({ id, edit, handleClose }) {
-    const products = useSelector(state => state.products.products);
+export default function AddProduct() {
+    const idStore=useParams();
     const dispatch = useDispatch();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
     const [price, setPrice] = useState(0);
-    const [img, setImg] = useState(null);
-    const [isOk, setIsOk] = useState(true);
-    const [open, setOpen] = useState(edit);
+    // const [img, setImg] = useState(null);
+    const [isOk, setIsOk] = useState(false);
     const [file, setFile] = useState(null);
-    const [product, setProduct] = useState(null);
-    const [toUpdate, setToUpdate] = useState(false);
+    const [toAdd, setToAdd] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
     const [categoryId, setCategoryId] = useState('');
-    const categories = useSelector(state => state.categories.categories);
+    const categories = useSelector(state => state.categories.categories); 
     const [currProduct, setCurrProduct] = useState({
-        Id: id,
         Name: '',
         Price: 0,
         Description: '',
@@ -30,60 +28,32 @@ export default function ProductEdit({ id, edit, handleClose }) {
         Image: '',
     });
 
-    useEffect(() => {
-        console.log(products);
-        setProduct(products.find(product => product.id === id));
-        console.log(product);
-    }, [products]);
-
-    useEffect(() => {
-        setOpen(edit);
-    }, [edit]);
-
-    useEffect(() => {
-        dispatch(getProduct())
-    }, []);
-
-    useEffect(() => {
-        if (product) {
-            console.log(product);
-            setName(product.name);
-            setDescription(product.description);
-            setPrice(product.price);
-            setImg(product.imgFile);
-            setCategoryId(product.categoryId);
-            console.log(product.categoryId);
-        }
-    }, [product]);
-
     const handleSave = (e) => {
         e.preventDefault();
-        if (!isOk) {
+        if (!isOk || file == null || price < 1) {
             alert('יש למלא את כל השדות בצורה תקינה');
             return;
         }
         else {
             console.log("ok");
             setCurrProduct({
-                Id: id,
                 Name: name,
                 Price: price,
                 Description: description,
                 CategoryId: categoryId,
-                StoreId: product.storeId,
-                Image: file ? file.get('Image') : img
+                StoreId: idStore,
+                Image: file.get('Image')
             });
-            setToUpdate(true);
+            setToAdd(true);
         }
 
     };
 
     useEffect(() => {
-        if (toUpdate) {
-            dispatch(updateProduct(currProduct))
-            handleClose();
+        if (toAdd) {
+            dispatch(addProduct(currProduct))
         }
-    }, [toUpdate]);
+    }, [toAdd]);
 
     const handleImageUpload = (e) => {
         const selectedFile = e.target.files[0];
@@ -100,6 +70,10 @@ export default function ProductEdit({ id, edit, handleClose }) {
             reader.readAsDataURL(selectedFile);
         }
     };
+
+    const handleClose = () => {
+        window.history.back();
+    }
     const handleCategoryChange = (event) => {
         setCategoryId(event.target.value);
     };
@@ -107,9 +81,9 @@ export default function ProductEdit({ id, edit, handleClose }) {
     return (
         <>
             <Logo />
-            <Dialog open={open} onClose={handleClose} sx={{ maxHeight: '120vh' }} scroll='paper'>
+            <Dialog open={'true'} onClose={handleClose} sx={{ maxHeight: '120vh' }} scroll='paper'>
                 <DialogTitle>
-                    עריכת פרטי מוצר
+                    הוספת מוצר
                     <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
                         <CloseIcon />
                     </IconButton>
@@ -117,23 +91,20 @@ export default function ProductEdit({ id, edit, handleClose }) {
                 <DialogContent>
                     <div style={{ marginBottom: '10px' }}>
                         <TextField
-                            label="שם"
-                            InputLabelProps={{
+                            label="שם" InputLabelProps={{
                                 style: { fontSize: '1rem' }
-                            }}
-                            value={name}
-                            onChange={(e) => {
+                            }}                
+                            value={name} onChange={(e) => {
                                 setName(e.target.value);
                                 setIsOk(e.target.value?.trim() !== '');
-                            }}
+                            }}                          
                             error={name?.trim() === ''}
                             helperText={name?.trim() === '' ? 'שדה חובה' : ''}
                         />
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                         <TextField
-                            label="תיאור מוצר"
-                            value={description}
+                            label="תיאור מוצר" value={description}                          
                             onChange={(e) => {
                                 setDescription(e.target.value);
                                 setIsOk(e.target.value?.trim() !== '');
@@ -144,6 +115,7 @@ export default function ProductEdit({ id, edit, handleClose }) {
                     </div>
                     <div style={{ marginBottom: '10px' }}>
                         <TextField
+                            inputProps={{ min: 0 }}
                             label="מחיר"
                             type="number"
                             value={price}
@@ -153,16 +125,17 @@ export default function ProductEdit({ id, edit, handleClose }) {
                             }}
                         />
                     </div>
-                    <label htmlFor="category"> :בחר קטגוריה</label>
+                    <label htmlFor="category">בחר קטגוריה:</label>
                     <br />
                     <select id="category" value={categoryId} onChange={handleCategoryChange}>
                         {categories.map(category => (
                             <option key={category.id} value={category.id}>{category.name}</option>
                         ))}
                     </select>
-                    <div style={{ marginBottom: '10px' }}>
+                    <div >
+                        <label htmlFor="image-upload"> :בחר תמונה</label>
+                        <br />
                         <Input
-                            label="תמונה"
                             type="file"
                             style={{ display: "none" }}
                             onChange={handleImageUpload}
@@ -173,9 +146,7 @@ export default function ProductEdit({ id, edit, handleClose }) {
                             }}
                             id="image-upload"
                         />
-                        <br />
-                        <button onClick={() => document.getElementById('image-upload').click()}> בחירה</button>
-                        <label htmlFor="image-upload"> : תמונה</label>
+                        <button onClick={() => document.getElementById('image-upload').click()}>Add Image</button>
                         {selectedImage && (
                             <img src={selectedImage} alt="Selected" style={{ maxWidth: '200px', marginTop: '10px' }} />
                         )}

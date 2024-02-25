@@ -41,7 +41,7 @@ export const setDetails = createAsyncThunk(
                 return response.data;
             }
         } catch (error) {
-            console.log("errorrrrrrrr" + error);
+            console.log("error" + error);
             return (error.message);
         }
     }

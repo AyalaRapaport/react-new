@@ -6,7 +6,7 @@ import '../Css/Delivers.css'
 import { Card, CardContent, Typography } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import { getDetails } from "../Redux/courierSlice";
-
+import Navbar from './Navbar';
 const Delivers = () => {
     const nav = useNavigate();
     const { id } = useParams();
@@ -19,7 +19,7 @@ const Delivers = () => {
     const details = useSelector(state => state.couriers.details);
     const status = useSelector(state => state.couriers.status);
     const dispatch = useDispatch();
-    const apiKey = 'AIzaSyBNVjEXhyDOUvcCECJFY5x_OGKt38dxVBk';
+    const apiKey = useSelector(state => state.address.apiKey);
 
     useEffect(() => {
         if (status === 'fulfilled') {
@@ -30,7 +30,7 @@ const Delivers = () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === 'OK') {
-                        setAddress( data.results[0].formatted_address);
+                        setAddress(data.results[0].formatted_address);
                     } else {
                         console.error('Error fetching address');
                     }
@@ -65,13 +65,6 @@ const Delivers = () => {
 
     useEffect(() => {
         dispatch(getDetails(id))
-        // .then((response) => {
-        //     console.log("Response from get:", response);
-        //     console.log(status);
-        // })
-        // .catch((error) => {
-        //     console.error("Error getting courier:", error);
-        // });
     }, [id]);
 
     return (
@@ -98,8 +91,8 @@ const Delivers = () => {
                     <button onClick={() => nav('/setCourierDetails/' + address)}>עריכה</button>
                 </Card >
             }
-
-            <Logo />
+            <Navbar />
+            <button onClick={()=>{nav('calculateDistance')}}>calculateDistance</button>
             {
                 !join &&
                 <>

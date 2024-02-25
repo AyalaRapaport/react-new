@@ -13,30 +13,43 @@ import DeliveryDetails from './Componets/DeliveryDetails';
 import SetCourierDetails from './Componets/SetCourierDetails';
 import Products from './Componets/products';
 import ProductEdit from './Componets/ProductEdit';
+import Categories from './Componets/Categories';
+import Stores from './Componets/Stores';
+import AddProduct from './Componets/AddProduct';
+import FilterCategory from './Componets/FilterCategory';
+import Cart from './Componets/Cart';
+import Navbar from './Componets/Navbar';
+import CalculateDistance from './Componets/CalculateDistance';
 
 function App() {
   return (
     <div className="App">
-        <Routes>
-          <Route path='courierDetails' element={<CourierDetails />} />
-          <Route path='homePage' element={<HomePage />} />
-          <Route path='personalArea' element={<PersonalArea />} />
-          <Route path='signIn' element={<SignIn />} />
-          <Route path='signUp' element={<SignUp />} />
-          <Route path='products' element={<Products />} />
-          <Route path='deliveryDetails' element={<DeliveryDetails />} />
-          <Route path='productEdit' element={<ProductEdit />} />
-          <Route path='/setCourierDetails/:address' element={<SetCourierDetails />} />
+      <Routes>
+        <Route path='courierDetails' element={<CourierDetails />} />
+        <Route path='homePage' element={<HomePage />} />
+        <Route path='cart' element={<Cart />} />
+        <Route path='navbar' element={<Navbar />} />
+        <Route path='signIn' element={<SignIn />} />
+        <Route path='signUp' element={<SignUp />} />
+        <Route path='products/:id' element={<Products />} />
+        <Route path='categories' element={<Categories />} />
+        <Route path='stores' element={<Stores />} />
+        <Route path='deliveryDetails' element={<DeliveryDetails />} />
+        <Route path='productEdit' element={<ProductEdit />} />
+        <Route path='addProduct/:storeId' element={<AddProduct />} />
+        <Route path='filterCategory/:categoryId' element={<FilterCategory />} />
+        <Route path='/setCourierDetails/:address' element={<SetCourierDetails />} />
+        <Route path='calculateDistance' element={<CalculateDistance />} />
 
-          <Route path='delivers/:id' element={<Delivers />}/>
-            <Route path='recognizeLocation/:location' element={<RecognizeLocation />} />
-            <Route path='chooseLocation/:showMap' element={<ChooseLocation />} />
-          {/* </Route> */}
+        <Route path='delivers/:id' element={<Delivers />} />
+        <Route path='recognizeLocation/:location' element={<RecognizeLocation />} />
+        <Route path='chooseLocation/:showMap' element={<ChooseLocation />} />
+        {/* </Route> */}
 
-          <Route path='logo' element={<Logo />} />
-          <Route path='' element={<HomePage />} />
-          <Route path='*' element={<h1> not found</h1>} />
-        </Routes>
+        <Route path='logo' element={<Logo />} />
+        <Route path='' element={<HomePage />} />
+        <Route path='*' element={<h1> not found</h1>} />
+      </Routes>
     </div>
   );
 }

@@ -1,11 +1,4 @@
-/* body {
-    margin: 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-} */
+
 #enterBtn:hover,
  #toCourierBtn:hover{
     color: rgb(62, 83, 32);
@@ -23,8 +16,9 @@
 }
 
 #enterBtn,
- #toCourierBtn{
-    margin-right: 5%; /* מרווח מימין, כמו שביקשת */
+ #toCourierBtn,
+ #showCart{
+    margin-right: 5%; 
     background-color: white;
     border: none;   
     font-size:large;

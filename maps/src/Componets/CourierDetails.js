@@ -5,6 +5,7 @@ import axios from 'axios';
 import ChooseLocation from './ChooseLocation';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCourier} from '../Redux/courierSlice';
+import { useNavigate } from 'react-router-dom';
 
 const CourierDetails = () => {
     const refName = useRef();
@@ -20,6 +21,7 @@ const CourierDetails = () => {
     const [isConfirm, setIsConfirm] = useState(false);
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
+    const nav=useNavigate();
     // const details = useSelector(state => state.couriers.details);
     // const status = useSelector(state => state.couriers.status);
     const dispatch = useDispatch();
@@ -106,6 +108,7 @@ const CourierDetails = () => {
         <>
             <link href={css} rel="stylesheet" />
             <Logo />
+            <button onClick={()=>{nav('calculateDistance')}}>calculateDistance</button>
             {!isCorrect && (
                 <div className="container">
                     <form>
