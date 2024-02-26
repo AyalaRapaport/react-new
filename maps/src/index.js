@@ -12,6 +12,9 @@ import { persistor, store } from './Redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 
 const theme = createTheme({
+  button:{
+    backgroundColor:'#00c4e7'
+  },
   palette: {
     primary: {
       main: '#00c4e7',

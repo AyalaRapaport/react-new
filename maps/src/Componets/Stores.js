@@ -14,17 +14,6 @@ const Stores = ({ categoryId }) => {
     const storesBycat = useSelector(state => state.categories.storesByCat);
 
     useEffect(() => {
-        console.log(storesBycat);
-    }, [storesBycat])
-    useEffect(() => {
-        console.log( filteredStores);
-    }, [filteredStores])
-
-    useEffect(() => {
-        dispatch(getStores());
-    }, [])
-
-    useEffect(() => {
         if (categoryId) {
             const filtered=[];           
             storesBycat[categoryId]?.forEach(category => {

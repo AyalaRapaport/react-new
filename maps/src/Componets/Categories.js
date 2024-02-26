@@ -3,21 +3,12 @@ import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
 import Typography from '@mui/material/Typography';
 import { useEffect, useState } from "react";
-import { getCategory, getStoresByCat } from "../Redux/categorySlice";
 import { useNavigate } from "react-router-dom";
 
 const Categories = () => {
     const dispatch = useDispatch();
     const categories = useSelector(state => state.categories.categories);
     const nav = useNavigate();
-
-    useEffect(() => {
-        dispatch(getCategory());
-    }, [])
-
-    useEffect(() => {
-        dispatch(getStoresByCat());
-    }, [])
 
     const filter = (categoryId) => {
         nav('/filterCategory/'+categoryId);

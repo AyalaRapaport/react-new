@@ -1,10 +1,8 @@
- /* button{
-    width: 30% !important ;
-} */
+
 .btnContainer {
     display: flex !important;
     justify-content: center; 
-    gap:5vw; 
+    gap:3vw; 
     margin-top: 2vb; 
 }
 
@@ -28,29 +26,17 @@
     border: 2px solid #5abed5;
 }
 #image{
-    width: 43vw;
-    height: 84vh;
+    width: 30vw;
+    height: 68vh;
     float: right;
-    margin-top: 12vb;
 }
 
 #join{
     background-color: #00c4e7;
     border: none;
     color: white;
-    height: 10vh;
     font-size: larger;
     border-radius: 5vb;
-}
-/* .inpSearch{
-width: 50% !important;
-} */
-/* .btnLocation:first-child::before {
-    content: url('../Assets/Images/location.png');
-    margin-right: 10px;
+    width:30% !important ;
 }
 
-.btnLocation:last-child::before {
-  
-    margin-right: 10px;
-} */

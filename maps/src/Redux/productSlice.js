@@ -42,27 +42,7 @@ export const getImage = createAsyncThunk(
         }
     }
 )
-// export const addProduct = createAsyncThunk(
-//     'addProduct',
-//     async (product) => {
-//         try {
-//             const response = await axios.post(`https://localhost:7229/api/Product`,
-//                 {
-//                     Name: product.Name,
-//                     Price: product.Price,
-//                     Description: product.Description,
-//                     CategoryId: product.CategoryId,
-//                     StoreId: product.StoreId,
-//                     Image: product.Image,
-//                 });
-//             // console.log(response.data);
-//             return response.data;
-
-//         } catch (error) {
-//             console.log(error);
-//         }
-//     }
-// );
+ 
 export const addProduct = createAsyncThunk(
     'addProduct',
     async (product) => {
@@ -92,7 +72,6 @@ export const addProduct = createAsyncThunk(
 export const updateProduct = createAsyncThunk(
     'updateProduct',
     async (product) => {
-        debugger
         try {
             const formData = new FormData();
             formData.append('Name', product.Name);

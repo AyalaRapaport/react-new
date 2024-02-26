@@ -20,6 +20,8 @@ import FilterCategory from './Componets/FilterCategory';
 import Cart from './Componets/Cart';
 import Navbar from './Componets/Navbar';
 import CalculateDistance from './Componets/CalculateDistance';
+import OrdersLocation from './Componets/OrdersLocation';
+import AddCategory from './Componets/AddCategory';
 
 function App() {
   return (
@@ -31,6 +33,8 @@ function App() {
         <Route path='navbar' element={<Navbar />} />
         <Route path='signIn' element={<SignIn />} />
         <Route path='signUp' element={<SignUp />} />
+        <Route path='addCategory' element={<AddCategory />} />
+        <Route path='ordersLocation' element={<OrdersLocation />} />
         <Route path='products/:id' element={<Products />} />
         <Route path='categories' element={<Categories />} />
         <Route path='stores' element={<Stores />} />
@@ -38,7 +42,7 @@ function App() {
         <Route path='productEdit' element={<ProductEdit />} />
         <Route path='addProduct/:storeId' element={<AddProduct />} />
         <Route path='filterCategory/:categoryId' element={<FilterCategory />} />
-        <Route path='/setCourierDetails/:address' element={<SetCourierDetails />} />
+        <Route path='/setCourierDetails' element={<SetCourierDetails />} />
         <Route path='calculateDistance' element={<CalculateDistance />} />
 
         <Route path='delivers/:id' element={<Delivers />} />

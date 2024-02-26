@@ -10,6 +10,7 @@ import categorySlice from "./categorySlice";
 import cartSlice from "./cartSlice";
 import storeSlice from "./storeSlice";
 import sessionStorage from "redux-persist/es/storage/session";
+import orderSlice from "./orderSlice";
 
 const reducers = {
   couriers: courierReducer,
@@ -18,7 +19,8 @@ const reducers = {
   products: productSlice,
   categories: categorySlice,
   inCart: cartSlice,
-  stores: storeSlice
+  stores: storeSlice,
+  orders:orderSlice
 }
 const rootReducer = combineReducers(reducers);
 

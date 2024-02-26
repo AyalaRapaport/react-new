@@ -14,10 +14,10 @@ const Navbar = () => {
             setShowButton(true);
         }
     }, [inCart])
-    return (<div>
-    <Logo />
-        <Link to={'/signIn'}> <button id='enterBtn'>כניסה לאיזור האישי</button></Link>
-        <Link to={'/courierDetails'}> <button id='toCourierBtn'>הצטרפות לשליחים  </button></Link>
+    return (<div style={{backgroundColor:'rgb(209 215 217)',height:'13vb'}}>
+    <Logo/>
+        <Link to={'/signIn'}> <button style={{backgroundColor:'transparent'}} id='enterBtn'>כניסה לאיזור האישי</button></Link>
+        <Link to={'/courierDetails'}> <button style={{backgroundColor:'transparent'}}id='toCourierBtn'>הצטרפות לשליחים  </button></Link>
         {showButton && <button onClick={()=>{setShowCart(true)}} id='showCart' >לצפייה בהזמנה </button> }
         {showCart&&<Cart/>}
     </div> );

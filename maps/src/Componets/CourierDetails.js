@@ -74,8 +74,8 @@ const CourierDetails = () => {
             setCourier({
                 IdCourier: refId.current.value,
                 IsActive: false,
-                XCoordinate: longitude,
-                YCoordinate: latitude,
+                XCoordinate: latitude,
+                YCoordinate: longitude,
                 Name: refName.current.value,
                 Email: refEmail.current.value,
                 Phone: refPhone.current.value,

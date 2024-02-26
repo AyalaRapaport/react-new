@@ -33,12 +33,6 @@ export const cartSlice = createSlice({
             console.log("action.payload" + action.payload);
             state.inCart = [...state.inCart, action.payload];
         });
-        // builder.addCase(removeProducts.fulfilled, (state, action) => {
-        //     debugger
-        //     state.status = 'fulfilled';
-        //     state.inCart = [];
-        //     console.log(state.inCart);
-        // });
     }
 });
 

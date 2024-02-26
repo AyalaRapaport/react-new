@@ -8,21 +8,23 @@ import { getDetails, setDetails } from '../Redux/courierSlice';
 import { useDispatch, useSelector } from 'react-redux';
 
 const SetCourierDetails = () => {
-    const addressFormat = useParams();
+    // const addressFormat = useSelector(state=>state.couriers.currentCourier);
     const refName = useRef();
     const refEmail = useRef();
     const refPhone = useRef();
     const [isCorrect, setIsCorrect] = useState(false);
+    const [isAddressValid, setIsAddressValid] = useState(false);
     const [isValidEmail, setIsValidEmail] = useState(false);
     const [isValidName, setIsValidName] = useState(false);
     const [isValidPhoneNumber, setIsValidPhoneNumber] = useState(false);
     const [isConfirm, setIsConfirm] = useState(false);
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
-    const details = useSelector(state => state.couriers.details);
-    const status = useSelector(state => state.couriers.status);
+    const details = useSelector(state => state.couriers.currentCourier);
+    const statusAddress = useSelector(state => state.addresses.statusAddress);
     const dispatch = useDispatch();
     const address = useSelector(state => state.addresses.address);
+    const apiKey = useSelector(state => state.addresses.apiKey)
     const [courier, setCourier] = useState({
         IdCourie: "",
         IsActive: false,
@@ -33,28 +35,30 @@ const SetCourierDetails = () => {
         Phone: "",
         Date: ""
     });
-    let apiKey = 'AIzaSyBNVjEXhyDOUvcCECJFY5x_OGKt38dxVBk';
 
-    // useEffect(() => {
-    //     dispatch(getDetails(id));
-    //     console.log(details);
-    // }, [id]);
     useEffect(() => {
         const getAddressCoordinates = async () => {
             try {
                 const response = await axios.get(
                     `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`
                 );
-                const { lat, lng } = response.data.results[0].geometry.location;
-                setLatitude(lat);
-                setLongitude(lng);
-                console.log("lng"+lat, lng);
+                if (response.data.results[0]) {
+                    const { lat, lng } = response.data.results[0].geometry.location;
+                    if (lat && lng) {
+                        setIsAddressValid(true);
+                        setLatitude(lat);
+                        setLongitude(lng);
+                        console.log("lng" + lat, lng);
+                    }
+                }
             } catch (error) {
                 console.error("Error getting coordinates:", error);
             }
         };
-        getAddressCoordinates();
-    }, [address]);
+        if (statusAddress)
+            getAddressCoordinates();
+    }, [statusAddress, address]);
+
 
     const HandleConfirmation = () => {
         const isNameValid = /^[A-Za-zא-ת\s]+$/u.test(refName.current.value) && refName.current.value.length > 1;
@@ -65,13 +69,12 @@ const SetCourierDetails = () => {
         setIsValidEmail(isEmailValid);
         setIsValidPhoneNumber(isPhoneNumberValid);
 
-        if (isNameValid && isEmailValid && isPhoneNumberValid) {
-            console.log("fg"+details);
+        if (isNameValid && isEmailValid && isPhoneNumberValid && isAddressValid) {
             setCourier({
-                IdCourier:details.idCourier,
+                IdCourier: details.idCourier,
                 IsActive: details.isActive,
-                XCoordinate: longitude,
-                YCoordinate: latitude,
+                XCoordinate: latitude,
+                YCoordinate: longitude,
                 Name: refName.current.value,
                 Email: refEmail.current.value,
                 Phone: refPhone.current.value,
@@ -81,6 +84,7 @@ const SetCourierDetails = () => {
         }
         else {
             setIsCorrect(false);
+           if(!isAddressValid) alert('בחר כתובת מהרשימה')
         }
     }
     useEffect(() => {
@@ -110,11 +114,6 @@ const SetCourierDetails = () => {
                             {!isValidName && isConfirm && (
                                 <span className="error-message">שם לא תקין</span>
                             )}
-                            {/* <label htmlFor='id'><i className="fa fa-envelope"></i> תעודת זהות</label>
-                            <input defaultValue={details.idCourier} ref={refId} type="text" id="id" name="id" />
-                            {!isValidIsraeliId && isConfirm && (
-                                <span className="error-message">תעודת זהות לא תקינה</span>
-                            )} */}
                             <label htmlFor="email"><i className="fa fa-envelope"></i> אימייל</label>
                             <input defaultValue={details.email} ref={refEmail} type="text" id="email" name="email" />
                             {!isValidEmail && isConfirm && (
@@ -126,7 +125,7 @@ const SetCourierDetails = () => {
                                 <span className="error-message">מספר טלפון לא תקין</span>
                             )}
                             <label> כתובת</label>
-                            <ChooseLocation address={addressFormat} />
+                            <ChooseLocation address={details.address} />
                             <input className="btn" type='button' value={"אישור"} onClick={HandleConfirmation} />
                             <div className="row">
                             </div>
@@ -136,7 +135,7 @@ const SetCourierDetails = () => {
             )}
             {isCorrect && (
                 <div>
-                    <h3> wolt מזל טוב!! הצטרפת ל</h3>
+                    <h3>השינוים נשמרו </h3>
                     <p>פרטייך נשמרו במערכת,ניתן לשנותם באיזור האישי</p>
                     <p>בכל שעה שתרצה ניתן להכנס לאיזור האישי ולצפות במשלוחים באזורך</p>
                 </div>

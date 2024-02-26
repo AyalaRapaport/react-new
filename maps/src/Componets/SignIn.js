@@ -15,17 +15,16 @@ import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
 import Logo from './Logo';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDetails } from '../Redux/courierSlice';
+import { getDetails, getDetailsById } from '../Redux/courierSlice';
 
 const defaultTheme = createTheme();
 
 export default function SignIn() {
   const [alignment, setAlignment] = React.useState('משתמש');
   const nav = useNavigate();
-  const details = useSelector(state => state.couriers.details);
+  // const details = useSelector(state => id ? state.couriers.details[id] : []);
   const status = useSelector(state => state.couriers.status);
   const dispatch = useDispatch();
-  let refId = React.useRef();
 
   const handleChange = (event, newAlignment) => {
     setAlignment(newAlignment);
@@ -36,9 +35,13 @@ export default function SignIn() {
     const data = new FormData(event.currentTarget);
     const id = data.get('id');
     if (alignment === 'שליח') {
-      dispatch(getDetails(id));
-      nav('/delivers/' + id)
-
+      dispatch(getDetailsById(id))
+        .then(() => {
+          nav('/delivers/' + id);
+        })
+        .catch(() => {
+          alert('אינך רשום כשליח');
+        });
     }
     else {
       axios.get(`https://localhost:7229/api/User/${data.get('id')}`)
@@ -56,11 +59,11 @@ export default function SignIn() {
     }
   };
 
-  React.useEffect(() => {
-    if (status === 'fulfilled') {
-      console.log("details", details);
-    }
-  }, [status, details]);
+  // React.useEffect(() => {
+  //   if (status === 'fulfilled') {
+  //     console.log("details", details);
+  //   }
+  // }, [status, details]);
 
   return (
     <>
@@ -121,7 +124,7 @@ export default function SignIn() {
                 type="id"
                 id="id"
                 autoComplete="current-password"
-                // ref={refId}
+              // ref={refId}
               />
 
               <Button

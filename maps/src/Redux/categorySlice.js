@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
-import Categories from '../Componets/Categories';
+
+const url='https://localhost:7229/api';
 
 const initialState = {
     categories: [{}],
@@ -9,7 +10,48 @@ const initialState = {
     imgStatus: 'init',
     storesByCat: []
 }
+export const addCategory = createAsyncThunk(
+    'addCategory',
+    async (category) => {
+        try {
+            const formData = new FormData();
+            formData.append('Name', category.Name);
+            formData.append('Image', category.Image);
 
+            const response = await axios.post(`${url}/Category`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+);
+
+
+export const updateCategory = createAsyncThunk(
+    'updateCategory',
+    async (category) => {
+        try {
+            const formData = new FormData();
+            formData.append('Name', category.Name);
+            formData.append('Image', category.Image);
+
+            const response = await axios.put(`${url}/category/${category.Id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data'
+                }
+            });
+
+            return response.data;
+        } catch (error) {
+            console.log(error);
+        }
+    }
+)
 export const getCategory = createAsyncThunk(
     'getCategory',
     async () => {
@@ -36,11 +78,8 @@ export const getStoresByCat = createAsyncThunk(
         try {
             const productsResponse = await axios.get('https://localhost:7229/api/Product');
             const products = productsResponse.data;
-            console.log(products);
             const categoryResponse = await axios.get('https://localhost:7229/api/Category');
-            // const categories = thunkAPI.getState().category.categories;
             const categories = categoryResponse.data;
-            console.log(categories);
             const storesByCategory = {};
 
             categories.forEach(category => {
@@ -81,7 +120,6 @@ export const categorySlice = createSlice({
             })
             .addCase(getStoresByCat.fulfilled, (state, action) => {
                 state.storesByCat = action.payload;
-                console.log(state.storesByCat);
             })
             .addCase(getStoresByCat.rejected, (state, action) => {
                 state.storesByCat = [];
