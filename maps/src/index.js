@@ -11,6 +11,7 @@ import { Provider } from 'react-redux';
 import { persistor, store } from './Redux/store';
 import { PersistGate } from 'redux-persist/integration/react';
 
+
 const theme = createTheme({
   button:{
     backgroundColor:'#00c4e7'
@@ -33,7 +34,7 @@ root.render(
       <Provider store={store}>
         <PersistGate loading={null} persistor={persistor}>
           <ThemeProvider theme={theme}>
-            <App />
+            <App/>
           </ThemeProvider>
         </PersistGate>
       </Provider>

@@ -4,6 +4,7 @@ import Map from "./Map";
 import css from '../Css/RecognizeLocation.css'
 import { useDispatch, useSelector } from "react-redux";
 import { addcurrentAddress, currentXCoordinate, currentYCoordinate } from "../Redux/addressSlice";
+import { removeNearbyLocations } from "../Redux/orderSlice";
 const RecognizeLocation = () => {
     const [isAdd, setIsAdd] = useState(false);
     const apiKey = useSelector(state => state.addresses.apiKey);
@@ -19,8 +20,9 @@ const RecognizeLocation = () => {
         dispatch(addcurrentAddress(currentAddress));
         dispatch(currentXCoordinate(lat));
         dispatch(currentYCoordinate(long));
-        nav('/calculateDistance');
-    };
+        dispatch(removeNearbyLocations());
+        nav('/ordersLocation')
+        };
 
 
     useEffect(() => {
@@ -49,7 +51,7 @@ const RecognizeLocation = () => {
         if (isAdd) {
             nav('/delivers/' + true);
         }
-    }, [isAdd, nav]);
+    }, [isAdd]);
 
     return (
         <>

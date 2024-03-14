@@ -62,10 +62,7 @@ export const getDetailsById = createAsyncThunk(
                 }
                 
                 return courier;
-            } else {
-                console.log("not courier");
-                return false;
-            }
+            } 
         } catch (error) {
             console.log(error);
             return (error.message);
@@ -102,6 +99,9 @@ export const addCourier = createAsyncThunk(
     'couriers/addCourier',
     async (courier) => {
         try {
+            const isExist = await axios.get(`https://localhost:7229/api/Courier/${courier.IdCourier}`);
+            if(isExist.status===200)
+            return true;
             const response = await axios.post('https://localhost:7229/api/Courier', {
                 idCourier: courier.IdCourier,
                 isActive: courier.IsActive,
@@ -115,13 +115,10 @@ export const addCourier = createAsyncThunk(
             });
             if (response.status === 200) {
                 return response.data;
-            } else {
-                console.log("not courier");
-                return ("not courier");
-            }
+            } 
         }
         catch (error) {
-            console.log("errorrrrrrrr" + error);
+            console.log("error" + error);
             return (error.message);
         }
     });

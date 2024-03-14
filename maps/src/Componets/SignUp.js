@@ -1,167 +1,180 @@
 import * as React from 'react';
-import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
-import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
-import Box from '@mui/material/Box';
-import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
-import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
-import Logo from './Logo';
 import { useState } from 'react';
 import { useEffect } from 'react';
 import axios from 'axios';
-import ChooseLocation from './ChooseLocation';
 import { useDispatch, useSelector } from 'react-redux';
-import { addUser } from '../Redux/userSlice';
+import { addUser, getUserDetailsById } from '../Redux/userSlice';
+import { StandaloneSearchBox } from '@react-google-maps/api';
+import Navbar from './Navbar';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
+import { useFormik } from 'formik';
+import { useNavigate } from 'react-router-dom';
 
-
-const SignIn = () => {
+const SignUp = () => {
   const [latitude, setLatitude] = useState(0);
-  const [longitude, setLongitude] = useState(0);  let apiKey = 'AIzaSyBNVjEXhyDOUvcCECJFY5x_OGKt38dxVBk';
-  const[isOk,setisOk]=useState(false);
-  const dispatch=useDispatch();
-  const address = useSelector(state => state.addresses.address);
+  const [longitude, setLongitude] = useState(0);
+  const apiKey = useSelector(state => state.addresses.apiKey);
+  const [isOk, setisOk] = useState(false);
+  const searchBox = React.useRef(null);
+  const dispatch = useDispatch();
+  const inputRef = React.useRef('');
+  const nav = useNavigate();
   const [user, setUser] = useState({
     idUser: "",
     XCoordinate: 0,
     YCoordinate: 0,
     Name: "",
     Email: "",
+    Password: ""
+  });
+  const SignupSchema = Yup.object().shape({
+    name: Yup.string()
+      .min(2, ' !קצר מידי')
+      .max(50, ' !ארוך מדי')
+      .required('שדה חובה')
+      .matches(
+        /^[א-תa-zA-Z0-9_]+$/,
+        'Username can only contain letters, numbers, and underscores'
+      ),
+    password: Yup.string().min(2, ' !קצר מידי').required('שדה חובה'),
+    email: Yup.string().email(' אימייל לא תקין').required('שדה חובה'),
+    id: Yup.string()
+      .min(9, 'הקש 9 תווים')
+      .max(9, 'הקש 9 תווים')
+      .required('שדה חובה'),
   });
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const data = new FormData(event.currentTarget);
-    setUser({
-      idUser: data.get('id'),
-      XCoordinate: latitude,
-      YCoordinate: longitude,
-      Name: data.get('name'),
-      Email: data.get('email'),
-    });
-   setisOk(true);
+  const handleSubmit = (value) => {
+    if (latitude && longitude) {
+      setUser({
+        idUser: value.id,
+        XCoordinate: latitude,
+        YCoordinate: longitude,
+        Name: value.name,
+        Email: value.email,
+        Password: value.password
+      });
+      setisOk(true);
+    }
+    else {
+      alert("כתובת אינה תקינה");
+      setisOk(false);
+    }
   }
 
-  useEffect(()=>{
-    if(isOk){
-      console.log(user);
-      dispatch(addUser(user));
-    }
-  },[isOk])
-
   useEffect(() => {
-    console.log("aaa"+ address);
-    const getAddressCoordinates = async () => {
-      try {
-        const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`
-        );
+    if (isOk) {
+      dispatch(addUser(user)).then((response) => {
+        if (response.payload === true) {
+          alert('משתמש כבר קיים');
+          setisOk(false);
+        }
+        else {
+          dispatch(getUserDetailsById(user.idUser));
+          nav('/homePage');
+        }
+      });
+    }
+  }, [isOk]);
+
+
+  const checkAddress = async (inputRef) => {
+    try {
+      const response = await axios.get(
+        `https://maps.googleapis.com/maps/api/geocode/json?address=${inputRef}&key=${apiKey}`
+      );
+      if (response.data.results[0]) {
         const { lat, lng } = response.data.results[0].geometry.location;
-        setLatitude(lat);
-        setLongitude(lng);
-        console.log("address" + lat, lng);
-      } catch (error) {
-        console.error("Error getting coordinates:", error);
+        if (lat && lng) {
+          // if (lat > 33.7 && lat < 36.3 && lng > 29.3 && lng < 33.5) {
+          if (lat > 29.3 && lat < 33.7 && lng > 33.5 && lng < 36.3) {
+            console.log(lat, lng);
+            setLatitude(lat);
+            setLongitude(lng);
+          }
+          else {
+            alert('בחר כתובת בישראל');
+            setLatitude(0);
+            setLongitude(0);
+          }
+        }
       }
-    };
-    getAddressCoordinates();
-  }, [address]);
+    }
+    catch (error) {
+      alert('בחר כתובת קיימת מישראל');
+      console.error("Error getting coordinates:", error);
+    }
+  }
 
   const defaultTheme = createTheme();
   return (
     <>
-      <Logo />
+      <Navbar />
       <ThemeProvider theme={defaultTheme}>
         <Container component="main" maxWidth="xs">
           <CssBaseline />
-          <Box
-            sx={{
-              marginTop: 8,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
+          <Formik
+            initialValues={{
+              email: '',
+              id: '',
+              name: ''
             }}
+            validationSchema={SignupSchema}
+            onSubmit={(values,) => {
+              handleSubmit(values);
+            }}
+
           >
-            <Avatar sx={{ m: 1, bgcolor: '#00c4e7' }}>
-              <LockOutlinedIcon />
-            </Avatar>
-            <Typography component="h1" variant="h5">
-              woltהצטרפות ל
-            </Typography>
-            <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="id"
-                label="id"
-                type="id"
-                id="id"
-                autoComplete="current-password"
-              />
-              {/* <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="address"
-                label="address"
-                type="address"
-                id="address"
-                autoComplete="current-password"
-              /> */}
-              <ChooseLocation address=''/>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="name"
-                label="name"
-                type="name"
-                id="name"
-                autoComplete="name"
-              />
-              <FormControlLabel
-                control={<Checkbox value="remember" color="primary" />}
-                label="Remember me"
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2, bgcolor: '#00c4e7' }}
-              >
-                Sign In
-              </Button>
-              <Grid container>
-                <Grid item xs>
+            {formik => (
+              <Form>
+                <TextField margin="normal" fullWidth id="email" label="אימייל " name="email" autoComplete="email"
+                  {...formik.getFieldProps('email')} error={formik.errors.email} helperText={formik.touched.email && formik.errors.email}
+                />
+                <TextField margin="normal" fullWidth name="id" label="תעודת זהות" type="text" id="id"
+                  {...formik.getFieldProps('id')} error={formik.touched.id && formik.errors.id} helperText={formik.touched.id && formik.errors.id}
+                />
+                <TextField margin="normal" fullWidth id="password" label="password " type='password' name="password" autoComplete="password"
+                  {...formik.getFieldProps('password')} error={formik.errors.password} helperText={formik.touched.password && formik.errors.password}
+                />
+                {/* <TextField margin="normal" fullWidth name="password" label="password" type="password" id="password"
+                  {...formik.getFieldProps('password')} error={formik.touched.password && formik.errors.password} helperText={formik.touched.password && formik.errors.password}
+                /> */}
+                <StandaloneSearchBox
+                  onLoad={(ref) => (searchBox.current = ref)}
+                >
+                  <input onBlur={() => checkAddress(inputRef.current.value)} className="inpSearch" ref={inputRef} type="text" placeholder="בחר כתובת" autoComplete="on" name='address'
+                  // {...formik.getFieldProps('name')} error={formik.touched.address && formik.errors.address} helperText={formik.touched.address && formik.errors.address}
+                  />
+                </StandaloneSearchBox>
+                <TextField margin="normal" fullWidth name="name" label="name" type="name" id="name" autoComplete="name" {...formik.getFieldProps('name')} error={formik.touched.name && formik.errors.name} helperText={formik.touched.name && formik.errors.name}
+                />
+                <FormControlLabel
+                  control={<Checkbox value="remember" color="primary" />}
+                  label="Remember me"
+                />
+                <Button disabled={!formik.isValid} type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, bgcolor: '#00c4e7' }}>
+                  הרשמה </Button>
 
+                <Grid container>
+                  <Grid item xs></Grid>
+                  <Grid item></Grid>
                 </Grid>
-                <Grid item>
-
-                </Grid>
-              </Grid>
-            </Box>
-          </Box>
-          {/* <Copyright sx={{ mt: 8, mb: 4 }} /> */}
+              </Form>
+            )}
+          </Formik>
         </Container>
       </ThemeProvider>
     </>
   );
 }
 
-export default SignIn
+export default SignUp

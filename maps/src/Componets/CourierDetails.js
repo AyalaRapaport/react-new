@@ -4,73 +4,89 @@ import Logo from './Logo';
 import axios from 'axios';
 import ChooseLocation from './ChooseLocation';
 import { useDispatch, useSelector } from 'react-redux';
-import { addCourier} from '../Redux/courierSlice';
+import { addCourier } from '../Redux/courierSlice';
 import { useNavigate } from 'react-router-dom';
+import Navbar from './Navbar';
+import { StandaloneSearchBox } from '@react-google-maps/api';
 
 const CourierDetails = () => {
     const refName = useRef();
     const refEmail = useRef();
     const refPhone = useRef();
     const refId = useRef();
-    const address = useSelector(state => state.addresses.address);
+    const refPassword = useRef();
     const [isCorrect, setIsCorrect] = useState(false);
     const [isValidEmail, setIsValidEmail] = useState(false);
     const [isValidIsraeliId, setIsValidIsraeliId] = useState(false);
     const [isValidName, setIsValidName] = useState(false);
+    const [isValidPassword, setIsValidPassword] = useState(false);
     const [isValidPhoneNumber, setIsValidPhoneNumber] = useState(false);
     const [isConfirm, setIsConfirm] = useState(false);
     const [latitude, setLatitude] = useState(0);
     const [longitude, setLongitude] = useState(0);
-    const nav=useNavigate();
-    // const details = useSelector(state => state.couriers.details);
-    // const status = useSelector(state => state.couriers.status);
+    const searchBox = useRef();
+    const inputRef = useRef();
+    const [isJoin, setIsJoin] = useState(false);
+    const nav = useNavigate();
     const dispatch = useDispatch();
-    let apiKey = 'AIzaSyBNVjEXhyDOUvcCECJFY5x_OGKt38dxVBk';
+    const apiKey = useSelector(state => state.addresses.apiKey);
     const [courier, setCourier] = useState({
         IdCourier: "",
         IsActive: false,
         XCoordinate: 0,
         YCoordinate: 0,
+        Password:'',
         Name: "",
         Email: "",
         Phone: "",
         Date: ""
     });
-    
-    
-    useEffect(() => {
-        console.log("Redux state updated: ", address);
-    }, [address]);
 
-    useEffect(() => {
-        const getAddressCoordinates = async () => {
-            try {
-                const response = await axios.get(
-                    `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`
-                );
+    const checkAddress = async (inputRef) => {
+        try {
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${inputRef}&key=${apiKey}`
+            );
+            if (response.data.results[0]) {
                 const { lat, lng } = response.data.results[0].geometry.location;
-                setLatitude(lat);
-                setLongitude(lng);
-                console.log("address" + lat, lng);
-            } catch (error) {
-                console.error("Error getting coordinates:", error);
+                if (lat && lng) {
+                    if (lat > 29.3 && lat < 33.7 && lng > 33.5 && lng < 36.3) {
+                        setLatitude(lat);
+                        setLongitude(lng);
+                    }
+                    else {
+                        alert('בחר כתובת בישראל');
+                        setLatitude(0);
+                        setLongitude(0);
+                    }
+                }
             }
-        };
-        getAddressCoordinates();
-    }, [address]);
+        }
+        catch (error) {
+            alert('בחר כתובת קיימת מישראל');
+            console.error("Error getting coordinates:", error);
+        }
+    }
+
+    const handlePlaceChanged = () => {
+        // setNewAddress(inputRef.current.value);
+    }
 
     const HandleConfirmation = () => {
         const isNameValid = /^[A-Za-zא-ת\s]+$/u.test(refName.current.value) && refName.current.value.length > 1;
         const isEmailValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(refEmail.current.value);
         const isIsraeliIdValid = /^\d{9}$/.test(refId.current.value);
         const isPhoneNumberValid = /^\d{10}$/.test(refPhone.current.value);
+        const isPasswordValid = /^(?=.*[0-9])(?=.*[a-zA-Z])[0-9a-zA-Z]{3,}$/.test(refPassword.current.value);
+
         setIsConfirm(true);
         setIsValidName(isNameValid);
         setIsValidEmail(isEmailValid);
         setIsValidIsraeliId(isIsraeliIdValid);
         setIsValidPhoneNumber(isPhoneNumberValid);
+        setIsValidPassword(isPasswordValid);
 
-        if (isNameValid && isEmailValid && isIsraeliIdValid && isPhoneNumberValid) {
+        if (isNameValid && isEmailValid && isIsraeliIdValid && isPhoneNumberValid&&isPasswordValid && longitude && latitude) {
             setCourier({
                 IdCourier: refId.current.value,
                 IsActive: false,
@@ -79,37 +95,44 @@ const CourierDetails = () => {
                 Name: refName.current.value,
                 Email: refEmail.current.value,
                 Phone: refPhone.current.value,
+                Password:refPassword.current.value,
                 lastShipment: new Date().toISOString()
             });
             setIsCorrect(true);
         }
         else {
             setIsCorrect(false);
+            alert('כתובת אינה תקינה')
         }
     }
+
     useEffect(() => {
         if (isCorrect) {
-            console.log( courier);
-            {dispatch(addCourier(courier))
-                .then((response) => {
-                    console.log("Response from addCourier:", response);
-                    setIsCorrect(true);
-                })
-                .catch((error) => {
-                    console.error("Error adding courier:", error);
-                    setIsCorrect(false);
-                });}
-                // else
-                // console.log("שליח כבר קיים");
+            {
+                dispatch(addCourier(courier))
+                    .then((response) => {
+                        if (response.payload === true) {
+                            alert('שליח כבר קיים');
+                            nav('/courierDetails')
+                            setIsJoin(false);
+                            setIsCorrect(false);
+                        }
+                        else
+                            setIsJoin(true);
+                    })
+                    .catch((error) => {
+                        console.error("Error adding courier:", error);
+                        setIsCorrect(false);
+                    });
+            }
         }
     }, [isCorrect]);
 
     return (
         <>
             <link href={css} rel="stylesheet" />
-            <Logo />
-            <button onClick={()=>{nav('calculateDistance')}}>calculateDistance</button>
-            {!isCorrect && (
+            <Navbar />
+            {!isJoin && (
                 <div className="container">
                     <form>
                         <div className="row">
@@ -134,8 +157,17 @@ const CourierDetails = () => {
                             {!isValidPhoneNumber && isConfirm && (
                                 <span className="error-message">מספר טלפון לא תקין</span>
                             )}
+                            <label><i className="fa fa-envelope"></i> ססמא</label>
+                            <input ref={refPassword} type="text"  />
+                            {!isValidPhoneNumber && isConfirm && (
+                                <span className="error-message">  הקש לפחות ספרות/אותיות </span>
+                            )}
                             <label> כתובת</label>
-                            <ChooseLocation address={address} />
+                            {/* <ChooseLocation address={address} /> */}
+                            <StandaloneSearchBox onLoad={(ref) => (searchBox.current = ref)} onPlacesChanged={handlePlaceChanged}>
+                                <input onBlur={() => checkAddress(inputRef.current.value)} className="inpSearch" ref={inputRef} type="text" placeholder="בחר כתובת" autoComplete="on"
+                                />
+                            </StandaloneSearchBox>
                             <input className="btn" type='button' value={"אישור"} onClick={HandleConfirmation} />
                             <div className="row">
                             </div>
@@ -143,7 +175,7 @@ const CourierDetails = () => {
                     </form>
                 </div>
             )}
-            {isCorrect && (
+            {isJoin && (
                 <div>
                     <h3> wolt מזל טוב!! הצטרפת ל</h3>
                     <p>פרטייך נשמרו במערכת,ניתן לשנותם באיזור האישי</p>

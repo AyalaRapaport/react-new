@@ -3,19 +3,33 @@ import axios from 'axios';
 
 const initialState = {
     userDetails: [],
-    status: 'init'
+    status: 'init',
+    currentUser: null,
 }
+const apiKey = 'AIzaSyBNVjEXhyDOUvcCECJFY5x_OGKt38dxVBk';
 
-export const getDetails = createAsyncThunk(
+export const getUserDetailsById = createAsyncThunk(
     'userDetails',
     async (id) => {
         try {
             const response = await axios.get(`https://localhost:7229/api/User/${id}`);
             if (response.status === 200) {
-                return response.data;
-            } else {
-                console.log("not courier");
-                return ("not user");
+                let user = response.data;
+                const latitude = user.xCoordinate;
+                const longitude = user.yCoordinate;
+                let geocodingApiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address&key=${apiKey}`;
+                await fetch(geocodingApiUrl)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'OK') {
+                            user = { ...user, address: data.results[0].formatted_address }
+
+                        } else {
+                            console.error('Error fetching address');
+                        }
+                    })
+                    .catch(error => console.error('Error fetching address:', error));
+                return user;
             }
         } catch (error) {
             console.log(error);
@@ -23,40 +37,27 @@ export const getDetails = createAsyncThunk(
         }
     }
 );
-export const setDetails = createAsyncThunk(
-    'setDetails',
-    async (user) => {
-        const response = await axios.put(`https://localhost:7229/api/User/${user.idCourier}`, {
-            // IdCourier: courier.IdCourier,
-            // IsActive: courier.IsActive,
-            // XCoordinate: courier.XCoordinate,
-            // YCoordinate: courier.YCoordinate,
-            // Name: courier.Name,
-            // Email: courier.Email,
-            // Phone: courier.Phone,
-            // LastShipment: courier.Date
-        });
-    }
-);
 
 export const addUser = createAsyncThunk(
     'users/addUser',
     async (user) => {
         try {
+            const isExist = await axios.get(`https://localhost:7229/api/Courier/${user.idUser}`);
+            if(isExist.status===200)
+            return true;
             const response = await axios.post('https://localhost:7229/api/User', {
-                idUser:user.idUser,
-                XCoordinate:user.XCoordinate,
+                idUser: user.idUser,
+                XCoordinate: user.XCoordinate,
                 YCoordinate: user.YCoordinate,
                 Name: user.Name,
                 Email: user.Email,
+                Password:user.Password
             });
-            console.log("res"+response.data);
             if (response.status === 200) {
                 return response.data;
-            } 
+            }
         }
         catch (error) {
-            console.log("errorrrrrrrr" + error);
             return (error.message);
         }
     });
@@ -68,14 +69,13 @@ export const userSlice = createSlice({
 
     },
     extraReducers: (builder) => {
-        builder.addCase(getDetails.fulfilled, (state, action) => {
+        builder.addCase(getUserDetailsById.fulfilled, (state, action) => {
             state.status = 'fulfilled'
-            state.details = action.payload
+            state.currentUser = action.payload;
         })
         builder.addCase(addUser.fulfilled, (state, action) => {
             state.status = 'fulfilled'
-            console.log(action.payload);
-            state.details = action.payload
+            state.userDetails = action.payload;
         })
     },
 }

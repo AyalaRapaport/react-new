@@ -1,32 +1,48 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Input, IconButton } from '@mui/material';
-import { useDispatch, } from 'react-redux';
+import { useDispatch, useSelector, } from 'react-redux';
 import CloseIcon from '@mui/icons-material/Close';
 import Navbar from './Navbar';
 import { addCategory } from '../Redux/categorySlice';
+import axios from 'axios';
+import { StandaloneSearchBox } from '@react-google-maps/api';
+import { addstore } from '../Redux/storeSlice';
 
-export default function AddCategory() {
+export default function AddStore() {
     const dispatch = useDispatch();
     const [name, setName] = useState('');
+    const [password, setPassword] = useState('');
     const [isOk, setIsOk] = useState(false);
     const [file, setFile] = useState(null);
     const [toAdd, setToAdd] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [currCategory, setCurrCategory] = useState({
+    const [latitude, setLatitude] = useState(0);
+    const [longitude, setLongitude] = useState(0);
+    const inputRef = useRef('');
+    const apiKey = useSelector(state => state.addresses.apiKey);
+    const searchBox = useRef(null);
+    const [currStore, setCurrcurrStore] = useState({
         Name: '',
+        XCoordinate: '',
+        YCoordinate: '',
+        Password: '',
         Image: '',
+
     });
 
     const handleSave = (e) => {
         e.preventDefault();
-        if (!isOk || file == null ) {
+        if (!isOk || file == null) {
             alert('יש למלא את כל השדות בצורה תקינה');
             return;
         }
         else {
             console.log("ok");
-            setCurrCategory({
+            setCurrcurrStore({
                 Name: name,
+                XCoordinate:latitude,
+                YCoordinate: longitude,
+                Password: password,
                 Image: file.get('Image')
             });
             setToAdd(true);
@@ -36,7 +52,7 @@ export default function AddCategory() {
 
     useEffect(() => {
         if (toAdd) {
-            dispatch(addCategory(currCategory))
+            dispatch(addstore(currStore))
             handleClose();
         }
     }, [toAdd]);
@@ -57,16 +73,43 @@ export default function AddCategory() {
     };
 
     const handleClose = () => {
-        setToAdd(false);
         window.history.back();
     }
-    
+    const checkAddress = async (inputRef) => {
+        try {
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${inputRef}&key=${apiKey}`
+            );
+            if (response.data.results[0]) {
+                const { lat, lng } = response.data.results[0].geometry.location;
+                if (lat && lng) {
+                    // if (lat > 33.7 && lat < 36.3 && lng > 29.3 && lng < 33.5) {
+                    if (lat > 29.3 && lat < 33.7 && lng > 33.5 && lng < 36.3) {
+
+                        setLatitude(lat);
+                        setLongitude(lng);
+                    }
+                    else {
+                        alert('בחר כתובת בישראל');
+                        setLatitude(0);
+                        setLongitude(0);
+                    }
+                }
+            }
+        }
+        catch (error) {
+            alert('בחר כתובת קיימת מישראל');
+            console.error("Error getting coordinates:", error);
+        }
+    }
+
+
     return (
         <>
             <Navbar />
-            <Dialog open={true} onClose={handleClose} sx={{ maxHeight: '120vh' }} scroll='paper'>
+            {/* <Dialog open={'true'} onClose={handleClose} sx={{ maxHeight: '120vh' }} scroll='paper'> */}
                 <DialogTitle>
-                    הוספת קטגוריה
+                    הוספת חנות
                     <IconButton onClick={handleClose} sx={{ position: 'absolute', right: 8, top: 8 }}>
                         <CloseIcon />
                     </IconButton>
@@ -84,8 +127,24 @@ export default function AddCategory() {
                             error={name?.trim() === ''}
                             helperText={name?.trim() === '' ? 'שדה חובה' : ''}
                         />
+                        <TextField
+                            label="ססמא" InputLabelProps={{
+                                style: { fontSize: '1rem' }
+                            }}
+                            value={password} onChange={(e) => {
+                                setPassword(e.target.value);
+                                setIsOk(e.target.value?.trim() !== '');
+                            }}
+                            error={password?.trim() === ''}
+                            helperText={password?.trim() === '' ? 'שדה חובה' : ''}
+                        />
                     </div>
-
+                    <StandaloneSearchBox
+                        onLoad={(ref) => (searchBox.current = ref)}
+                    >
+                        <input onBlur={() => checkAddress(inputRef.current.value)} className="inpSearch" ref={inputRef} type="text" placeholder="בחר כתובת" autoComplete="on" name='address'
+                        />
+                    </StandaloneSearchBox>
                     <label htmlFor="image-upload"> :בחר תמונה</label>
                     <br />
                     <Input
@@ -99,7 +158,7 @@ export default function AddCategory() {
                         }}
                         id="image-upload"
                     />
-                    <Button onClick={() => document.getElementById('image-upload').click()}>הוסף תמונה </Button>
+                    <button onClick={() => document.getElementById('image-upload').click()}>Add Image</button>
                     {selectedImage && (
                         <img src={selectedImage} alt="Selected" style={{ maxWidth: '200px', marginTop: '10px' }} />
                     )}
@@ -110,7 +169,7 @@ export default function AddCategory() {
                         שמור
                     </Button>
                 </DialogActions>
-            </Dialog>
+            {/* </Dialog> */}
         </>
     );
 }

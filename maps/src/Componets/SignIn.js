@@ -15,7 +15,8 @@ import axios from 'axios';
 import { Link, useNavigate } from "react-router-dom";
 import Logo from './Logo';
 import { useDispatch, useSelector } from 'react-redux';
-import { getDetails, getDetailsById } from '../Redux/courierSlice';
+import { getDetailsById } from '../Redux/courierSlice';
+import { getUserDetailsById } from '../Redux/userSlice';
 
 const defaultTheme = createTheme();
 
@@ -23,7 +24,6 @@ export default function SignIn() {
   const [alignment, setAlignment] = React.useState('משתמש');
   const nav = useNavigate();
   // const details = useSelector(state => id ? state.couriers.details[id] : []);
-  const status = useSelector(state => state.couriers.status);
   const dispatch = useDispatch();
 
   const handleChange = (event, newAlignment) => {
@@ -36,34 +36,27 @@ export default function SignIn() {
     const id = data.get('id');
     if (alignment === 'שליח') {
       dispatch(getDetailsById(id))
-        .then(() => {
-          nav('/delivers/' + id);
+        .then((res) => {
+          if (res.payload)
+            nav('/delivers');
+          else alert('אינך רשום כשליח');
         })
         .catch(() => {
           alert('אינך רשום כשליח');
         });
     }
     else {
-      axios.get(`https://localhost:7229/api/User/${data.get('id')}`)
+      dispatch(getUserDetailsById(data.get('id')))
         .then((res) => {
-          console.log(res);
-          if (res.data) {
-          }
-          else {
-          }
-
+          if (res.payload)
+            nav('/homepage')
+          else alert('אינך רשום');
         })
-        .catch((err) => {
-          console.log(err);
+        .catch(() => {
+          alert('אינך רשום');
         })
     }
   };
-
-  // React.useEffect(() => {
-  //   if (status === 'fulfilled') {
-  //     console.log("details", details);
-  //   }
-  // }, [status, details]);
 
   return (
     <>

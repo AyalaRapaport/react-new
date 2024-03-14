@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit'
 import axios from 'axios';
 
-const url='https://localhost:7229/api';
+const url = 'https://localhost:7229/api';
 
 const initialState = {
     categories: [{}],
@@ -24,6 +24,8 @@ export const addCategory = createAsyncThunk(
                 }
             });
 
+            const img = await axios.get(`https://localhost:7229/api/Product/getImage/${category.Image.name}`)
+            response.data = { ...response.data, imgFile: img.data }
             return response.data;
         } catch (error) {
             console.log(error);
@@ -46,6 +48,8 @@ export const updateCategory = createAsyncThunk(
                 }
             });
 
+            const img = await axios.get(`https://localhost:7229/api/Product/getImage/${category.Image.name}`)
+            response.data = { ...response.data, imgFile: img.data }
             return response.data;
         } catch (error) {
             console.log(error);
@@ -92,11 +96,11 @@ export const getStoresByCat = createAsyncThunk(
                 if (storesByCategory[categoryId]) {
                     let isexist = false;
                     for (let i = 0; i < storesByCategory[categoryId].length; i++) {
-                        if (storesByCategory[categoryId][i]===storeId)  
-                        isexist=true;                      
+                        if (storesByCategory[categoryId][i] === storeId)
+                            isexist = true;
                     }
-                    if(!isexist)
-                    storesByCategory[categoryId].push(storeId);
+                    if (!isexist)
+                        storesByCategory[categoryId].push(storeId);
                 }
             });
 
@@ -113,17 +117,25 @@ export const categorySlice = createSlice({
     initialState,
     reducers: {},
     extraReducers: (builder) => {
-        builder
-            .addCase(getCategory.fulfilled, (state, action) => {
-                state.status = 'fulfilled'
-                state.categories = action.payload
-            })
-            .addCase(getStoresByCat.fulfilled, (state, action) => {
-                state.storesByCat = action.payload;
-            })
-            .addCase(getStoresByCat.rejected, (state, action) => {
-                state.storesByCat = [];
-            });
+
+        builder.addCase(getCategory.fulfilled, (state, action) => {
+            state.status = 'fulfilled'
+            state.categories = action.payload
+        })
+        builder.addCase(getStoresByCat.fulfilled, (state, action) => {
+            state.storesByCat = action.payload;
+        })
+        builder.addCase(getStoresByCat.rejected, (state, action) => {
+            state.storesByCat = [];
+        });
+
+        builder.addCase(addCategory.fulfilled, (state, action) => {
+            return {
+                ...state,
+                categories: [...state.categories, action.payload]
+            };
+        });
+
     },
 });
 

@@ -1,33 +1,35 @@
-
 body {
     font-family: Arial;
     font-size: 17px;
     padding: 8px;
- 
+
 }
+
 * {
     box-sizing: border-box;
 }
 
 *.row {
-    display: -ms-flexbox;  
+    display: -ms-flexbox;
     display: flex;
-    -ms-flex-wrap: wrap;  
+    -ms-flex-wrap: wrap;
     flex-wrap: wrap;
     margin: 0 -16px;
     padding: 0 16px;
-    -ms-flex: 50%;  
+    -ms-flex: 50%;
     flex: 50%;
 }
 
 .container {
-    background-color: #efefef ;
+    background-color: #efefef;
     padding: 5px 20px 15px 20px;
     border: 1px solid lightgrey;
     border-radius: 3px;
-    width: 40%!important;
+    width: 40% !important;
 }
-input[type=text], input[type=number] {
+
+input[type=text],
+input[type=number] {
     width: 100%;
     margin-bottom: 20px;
     padding: 12px;
@@ -40,8 +42,8 @@ label {
     display: block;
 }
 
-.btn  {
-    background-color: rgb(0, 157, 224)!important;
+.btn {
+    background-color: rgb(0, 157, 224) !important;
     color: white;
     padding: 12px;
     margin: 10px 0;
@@ -52,20 +54,21 @@ label {
     font-size: 17px;
 }
 
-    .btn:hover {
-        opacity:0.8;
-    }
+.btn:hover {
+    opacity: 0.8;
+}
 
 
-h3{
+h3 {
     text-align: center;
     color: #009de0 !important;
 
 }
-span{
+
+/* span {
     color: red;
     text-align: right;
-}
+} */
 
 /* Responsive layout - when the screen is less than 800px wide, make the two columns stack on top of each other instead of next to each other (also change the direction - make the "cart" column go on top) */
 /* @media (max-width: 800px) {

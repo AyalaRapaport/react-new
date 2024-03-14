@@ -29,10 +29,10 @@ export const addressSlice = createSlice({
             state.currentAddress = action.payload;
         },
         currentXCoordinate: (state, action) => {
-            state.currentAddress = action.payload;
+            state.currentXCoordinate = action.payload;
         },
         currentYCoordinate: (state, action) => {
-            state.currentAddress = action.payload;
+            state.currentYCoordinate = action.payload;
         },
     },
     // extraReducers: (builder) => {

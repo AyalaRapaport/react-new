@@ -21,20 +21,14 @@ const DeliveryDetails = () => {
                     <div className="card card-custom pb-4">
                         <div className="card-body mt-0 mx-5">
                             <div className="text-center mb-3 pb-2 mt-3">
-                                <h4 style={{ color: "#495057" }}>Delivery Details</h4>
+                                <h4 style={{ color: "#495057" }}>פרטי הזמנה</h4>
                             </div>
                             <form className="mb-0">
                                 <div className="row mb-4">
                                     <div className="col">
                                         <div className="form-outline">
+                                            <label className="form-label" htmlFor="form9Example1">שם</label>
                                             <input type="text" id="form9Example1" className="form-control input-custom" />
-                                            <label className="form-label" htmlFor="form9Example1">First name</label>
-                                        </div>
-                                    </div>
-                                    <div className="col">
-                                        <div className="form-outline">
-                                            <input type="text" id="form9Example2" className="form-control input-custom" />
-                                            <label className="form-label" htmlFor="form9Example2">Last name</label>
                                         </div>
                                     </div>
                                 </div>

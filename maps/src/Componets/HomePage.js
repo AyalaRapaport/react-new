@@ -4,29 +4,86 @@ import background from '../Assets/Images/1.jpg'
 import Categories from './Categories';
 import Stores from './Stores';
 import Navbar from './Navbar';
-import { useDispatch } from 'react-redux';
-import { getStores } from '../Redux/storeSlice';
-import { getCategory, getStoresByCat } from '../Redux/categorySlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { Button } from '@mui/material';
+import { addStoreNearby } from '../Redux/storeSlice';
+import { useNavigate } from 'react-router-dom';
 
 const HomePage = () => {
     const dispatch = useDispatch();
-    
-    useEffect(() => {
-        dispatch(getStores()).then(() => {
-            dispatch(getCategory()).then(() => {
-                dispatch(getStoresByCat());
-            });
-        });
-    }, []);
-    
+    const user = useSelector(state => state.users.currentUser);
+    const stores = useSelector(state => state.stores.stores);
+    const [showNearby, setshowNearby] = useState(false);
+    const currentUser = useSelector(state => state.users.currentUser)
+    const nav = useNavigate();
+    const shopsNearby = () => {
+        if (!showNearby) {
+            setshowNearby(true);
+            for (let i = 0; i < stores.length; i++) {
+                const distance = calculateDistance({ lat: user.xCoordinate, lng: user.yCoordinate }, { xStore: stores[i].xCoordinate, yStore: stores[i].yCoordinate });
+                if (distance <= 15) {
+                    console.log(stores[i]);
+                    dispatch(addStoreNearby(stores[i]));
+                }
+            }
+        }
+        else
+            setshowNearby(false);
+    }
+
+    function toRadians(degrees) {
+        return degrees * Math.PI / 180;
+    }
+
+    function calculateDistance(location1, location2) {
+        //distance to store
+        const earthRadius = 6371;
+        const lat1 = toRadians(location1.lat);
+        const lon1 = toRadians(location1.lng);
+        const lat2 = toRadians(location2.xStore);
+        const lon2 = toRadians(location2.yStore);
+        const dLat = lat2 - lat1;
+        const dLon = lon2 - lon1;
+
+        const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(lat1) * Math.cos(lat2) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const distance = earthRadius * c;
+        return distance;
+    }
+    useEffect(()=>{
+        console.log("j"+currentUser?.id);
+    },[currentUser])
     return (<>
         <link href={css} rel="stylesheet" />
         <Navbar />
         <div id='back'>
-            <img alt='background' id='background' src={process.env.PUBLIC_URL + '1.png'} /></div>
-        <Stores />
-        <Categories />
-        {/* <Products/> */}
+            <img alt='background' id='background' src={process.env.PUBLIC_URL + 'backwolt.png'} />
+            <div id='details'>
+                {user &&
+                    <>
+                        <p id='text'>היי {user.name} </p>
+                        <p id='text'>{user.address}</p>
+                        {!showNearby && <Button onClick={() => shopsNearby()}>חנויות באזורך</Button>}
+                        {showNearby && <Button onClick={() => shopsNearby()}>הצגת כל החנויות </Button>}
+                    </>
+                }
+            </div>
+        </div >
+        {currentUser?.idUser=='326546033'&&<>
+            <Button onClick={() => nav('/addStore')}>הוספת חנות</Button>
+            <Button onClick={() => nav('/addCategory')}>הוספת קטגוריה</Button>
+        </>}
+        {showNearby && <Stores showNearby={showNearby} />
+        }
+        {
+            !showNearby &&
+            <>
+                <Stores />
+                <Categories />
+            </>
+        }
     </>);
 }
 

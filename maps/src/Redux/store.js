@@ -28,10 +28,7 @@ const persistConfig = {
   key: 'root',
   storage:sessionStorage,
   whitelist: ['couriers', 'users','categories'],
-  // storage: storage,
-  // blacklist: ['someReducerToExclude'],
-  // stateReconciler: autoMergeLevel2,
-  // serialize: false,
+ 
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);

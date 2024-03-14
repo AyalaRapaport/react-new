@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import { TextField, Button, Dialog, DialogTitle, DialogContent, DialogActions, Input, IconButton } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
-import { getProduct, updateProduct } from '../Redux/productSlice';
+import { deletePro, getProduct, updateProduct } from '../Redux/productSlice';
 import Logo from './Logo';
 import CloseIcon from '@mui/icons-material/Close';
+import {  editProductInStore } from '../Redux/storeSlice';
 
 export default function ProductEdit({ id, edit, handleClose }) {
     const products = useSelector(state => state.products.products);
@@ -31,9 +32,7 @@ export default function ProductEdit({ id, edit, handleClose }) {
     });
 
     useEffect(() => {
-        console.log(products);
         setProduct(products.find(product => product.id === id));
-        console.log(product);
     }, [products]);
 
     useEffect(() => {
@@ -56,6 +55,10 @@ export default function ProductEdit({ id, edit, handleClose }) {
         }
     }, [product]);
 
+    const deleteProduct = () => {
+        dispatch(deletePro(id))
+        handleClose();
+    }
     const handleSave = (e) => {
         e.preventDefault();
         if (!isOk) {
@@ -186,6 +189,7 @@ export default function ProductEdit({ id, edit, handleClose }) {
                     <Button onClick={handleSave} color="primary">
                         שמור
                     </Button>
+                    <Button onClick={deleteProduct} color="primary">מחק מוצר </Button>
                 </DialogActions>
             </Dialog>
         </>

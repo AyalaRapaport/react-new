@@ -8,6 +8,7 @@ import { useParams } from 'react-router-dom';
 
 export default function AddProduct() {
     const idStore=useParams();
+    console.log(idStore);
     const dispatch = useDispatch();
     const [name, setName] = useState('');
     const [description, setDescription] = useState('');
@@ -17,7 +18,7 @@ export default function AddProduct() {
     const [file, setFile] = useState(null);
     const [toAdd, setToAdd] = useState(false);
     const [selectedImage, setSelectedImage] = useState(null);
-    const [categoryId, setCategoryId] = useState('');
+    const [categoryId, setCategoryId] = useState(1);
     const categories = useSelector(state => state.categories.categories); 
     const [currProduct, setCurrProduct] = useState({
         Name: '',
@@ -40,7 +41,7 @@ export default function AddProduct() {
                 Name: name,
                 Price: price,
                 Description: description,
-                CategoryId: categoryId,
+                CategoryId: +categoryId,
                 StoreId: idStore,
                 Image: file.get('Image')
             });
@@ -51,7 +52,9 @@ export default function AddProduct() {
 
     useEffect(() => {
         if (toAdd) {
+            console.log(idStore);
             dispatch(addProduct(currProduct))
+            handleClose();
         }
     }, [toAdd]);
 
@@ -60,7 +63,6 @@ export default function AddProduct() {
         const formData = new FormData();
         formData.append('Image', selectedFile);
         setFile(formData);
-        // const file = e.target.files[0];
         const reader = new FileReader();
         reader.onload = () => {
             setSelectedImage(reader.result);
@@ -146,7 +148,7 @@ export default function AddProduct() {
                             }}
                             id="image-upload"
                         />
-                        <button onClick={() => document.getElementById('image-upload').click()}>Add Image</button>
+                        <Button onClick={() => document.getElementById('image-upload').click()}> הוסף תמונה</Button>
                         {selectedImage && (
                             <img src={selectedImage} alt="Selected" style={{ maxWidth: '200px', marginTop: '10px' }} />
                         )}

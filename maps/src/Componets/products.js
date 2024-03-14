@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import '../Css/Products.scss';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
@@ -7,9 +7,8 @@ import { useTheme } from '@mui/material/styles';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import ProductEdit from './ProductEdit'
-import { addProduct } from '../Redux/cartSlice';
-import Logo from './Logo';
-import { Button } from '@mui/material';
+import { addProductToCart } from '../Redux/cartSlice';
+import { Button, TextField } from '@mui/material';
 import CustomAlert from './Alert';
 import Navbar from './Navbar';
 
@@ -20,26 +19,35 @@ export default function Products() {
     const nav = useNavigate();
     const inCart = useSelector(state => state.inCart.inCart);
     const theme = useTheme();
-    const images = useSelector(state => state.products.images);
     const [currentId, setCurrentId] = useState(-1);
     const products = useSelector(state => id ? state.stores.productLists[id] : []);
+    const stores = useSelector(state => state.stores.stores);
     const [showAlert, setShowAlert] = useState(false);
+    const [showPass, setShowPass] = useState(false);
+    const [password, setPassword] = useState('');
+    const [isManager, setIsManager] = useState(false);
 
     const handleEdit = (productId) => {
         setEdit(true);
         setCurrentId(productId)
     };
-    useEffect(() => {
-        console.log(products);
-    }, [products])
+
 
     const handleClose = () => { setEdit(false); };
 
     const handleSave = () => { handleClose(); };
 
+    const handleSubmit = () => {
+        stores.forEach(store => {
+            if (store.id==id&&store.password === password) {
+                setIsManager(true);
+            }
+        });
+    };
+
     const addToCart = (product) => {
         if (!inCart[0] || inCart[0].storeId === product.storeId) {
-            dispatch(addProduct(product));
+            dispatch(addProductToCart(product));
         }
         else {
             console.log("alert");
@@ -50,9 +58,14 @@ export default function Products() {
     return (
         <>
             <Navbar />
-            {showAlert && <CustomAlert /> }
-            <Button onClick={() => { nav('/addProduct/' + products[0].storeId) }}>הוספת מוצר</Button>
-            <div className='product'>
+            {showAlert && <CustomAlert />}
+           {!isManager&& <Button onClick={() => setShowPass(true)} >כניסת מנהל</Button>}
+            {showPass &&!isManager&& <div>
+                <TextField label="סיסמה" type="password" variant="outlined" onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button onClick={() => handleSubmit()} type="submit">כניסה</Button>
+            </div> }
+            {isManager&&<Button onClick={() => { nav('/addProduct/' + id) }}>הוספת מוצר</Button> }            <div className='product'>
                 {Array.isArray(products) && products.length > 0 && products?.map(product => (
                     <div className='mycard' key={product.id}>
                         <button onClick={() => { addToCart(product) }} className='plus'> +</button>
@@ -78,7 +91,7 @@ export default function Products() {
                                 </Typography>
                             </div>
                             {/* <button onClick={() => nav('/productEdit')}>edit</button> */}
-                            <button onClick={() => handleEdit(product.id)}>edit</button>
+                            {isManager&&<Button onClick={() => handleEdit(product.id)}>עריכה</Button>}
 
                         </CardContent>
                     </div>

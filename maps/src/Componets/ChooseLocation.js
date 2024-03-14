@@ -8,6 +8,7 @@ import { addAddress, addcurrentAddress, currentXCoordinate, currentYCoordinate }
 import axios from "axios";
 import { useTheme } from "@emotion/react";
 import { Button } from "@mui/material";
+import { removeNearbyLocations } from "../Redux/orderSlice";
 
 const ChooseLocation = (props) => {
     const apiKey = useSelector(state => state.addresses.apiKey);
@@ -17,12 +18,14 @@ const ChooseLocation = (props) => {
     const [newAddress, setNewAddress] = useState('');
     const dispatch = useDispatch();
     let { showMap } = useParams();
+    const [isShowMap, setIsShowMap] = useState(showMap);
     const [latitude, setLatitude] = useState(null);
     const [longitude, setLongitude] = useState(null);
     const details = useSelector(state => state.couriers.currentCourier);
     const nav = useNavigate();
     if (showMap) showMap = true;
     else showMap = false;
+    console.log(showMap);
 
     const handlePlaceChanged = () => {
         setNewAddress(inputRef.current.value);
@@ -30,20 +33,20 @@ const ChooseLocation = (props) => {
     // useEffect(() =>{
     //     console.log(!showMap ,address)
     // },[])
-    const getAddressCoordinates = async (address) => {
-        try {
-            console.log(address);
-            const response = await axios.get(
-                `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`
-            );
-            const { lat, lng } = response.data.results[0].geometry.location;
-            setLatitude(lat);
-            setLongitude(lng);
-            console.log("myaddress" + lat, lng);
-        } catch (error) {
-            console.error("Error getting coordinates:", error);
-        }
-    };
+    // const getAddressCoordinates = async (address) => {
+    //     try {
+    //         console.log(address);
+    //         const response = await axios.get(
+    //             `https://maps.googleapis.com/maps/api/geocode/json?address=${address}&key=${apiKey}`
+    //         );
+    //         const { lat, lng } = response.data.results[0].geometry.location;
+    //         setLatitude(lat);
+    //         setLongitude(lng);
+    //         console.log("myaddress" + lat, lng);
+    //     } catch (error) {
+    //         console.error("Error getting coordinates:", error);
+    //     }
+    // };
 
     const ok = async () => {
         const response = await axios.get(
@@ -55,14 +58,15 @@ const ChooseLocation = (props) => {
             if (lat && lng) {
                 setNewAddress(inputRef.current.value);
                 dispatch(addAddress(newAddress));
-                getAddressCoordinates(inputRef.current.value);
+                // getAddressCoordinates(inputRef.current.value);
                 dispatch(addcurrentAddress(newAddress));
-                dispatch(currentXCoordinate(latitude));
-                dispatch(currentYCoordinate(longitude));
-                nav('/calculateDistance');
-
+                dispatch(currentXCoordinate(lat));
+                dispatch(currentYCoordinate(lng));
+                dispatch(removeNearbyLocations());
                 if (showMap) {
-                    nav('/delivers/' + true);
+                    nav('/ordersLocation');
+
+                    // nav('/delivers/' + true);
                 }
             } else {
                 alert('בחר כתובת מהרשימה');
@@ -76,7 +80,6 @@ const ChooseLocation = (props) => {
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             <StandaloneSearchBox onLoad={(ref) => (searchBox.current = ref)} onPlacesChanged={handlePlaceChanged}>
                 <input
-                    // style={{width:'200%'}}
                     className="inpSearch"
                     ref={inputRef}
                     type="text"

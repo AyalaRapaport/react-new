@@ -7,27 +7,17 @@ import { Button, Card, CardContent, Grid, Typography } from '@mui/material';
 import { useDispatch, useSelector } from "react-redux";
 import Navbar from './Navbar';
 import { addcurrentAddress, currentXCoordinate, currentYCoordinate } from "../Redux/addressSlice";
+import { removeNearbyLocations } from "../Redux/orderSlice";
 const Delivers = () => {
     const nav = useNavigate();
-    const { id } = useParams();
     const [join, setJoin] = useState(false);
     const [recognizeLocation, setRecognizeLocation] = useState(false);
     const [currentAddress, setCurrentAddress] = useState("");
-    const [address, setAddress] = useState('');
     const details = useSelector(state => state.couriers.currentCourier);
     const status = useSelector(state => state.couriers.status);
     const dispatch = useDispatch();
     const apiKey = useSelector(state => state.addresses.apiKey);
-    // const latitude = details.yCoordinate;
-    // const longitude = details.xCoordinate;
 
-    // useEffect(() => {
-    //     dispatch(getDetailsById(id))
-    // }, [id]);
-
-    useEffect(() => {
-        console.log(details);
-    }, [details]);
 
     useEffect(() => {
         if (navigator.geolocation) {
@@ -52,16 +42,16 @@ const Delivers = () => {
         }
     }, []);
 
-const addLocation=()=>{
-    dispatch(currentXCoordinate(details.xCoordinate));
-    dispatch(currentYCoordinate(details.yCoordinate));
-    dispatch(addcurrentAddress(details.address));
-    nav('/ordersLocation')
-}
+    const addLocation = () => {
+        dispatch(currentXCoordinate(details.xCoordinate));
+        dispatch(currentYCoordinate(details.yCoordinate));
+        dispatch(addcurrentAddress(details.address));
+        dispatch(removeNearbyLocations());
+        nav('/ordersLocation')
+    }
     return (
         <>
             <Navbar />
-            <button onClick={() => { nav('/calculateDistance') }}>calculateDistance</button>
             <Grid container spacing={2}>
                 <Grid item xs={12} sm={6}>
                     <div id="location">
@@ -77,7 +67,6 @@ const addLocation=()=>{
                                 <input className="btnLocation" value={"זהה מיקום"} type="button" onClick={() => nav(`/recognizeLocation/${currentAddress}`)} />
                                 <input className="btnLocation" value={" בחר מיקום"} type="button" onClick={() => nav('/chooseLocation/' + true)} />
                                 <input className="btnLocation" value={details.address} type="button" onClick={() => { addLocation() }} />
-
                             </div>
                         )}
 
