@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation ,useHistory } from 'react-router-dom';
 import logo from '../Assets/Images/logo.png';
 import css from '../Css/Logo.css';
 const Logo = () => {

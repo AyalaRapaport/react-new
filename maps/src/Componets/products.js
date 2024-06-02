@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../Css/Products.scss';
 import CardMedia from '@mui/material/CardMedia';
 import CardContent from '@mui/material/CardContent';
@@ -32,14 +32,17 @@ export default function Products() {
         setCurrentId(productId)
     };
 
-
+    useEffect(() => {
+        console.log("products");
+        console.log(products);
+    }, [products])
     const handleClose = () => { setEdit(false); };
 
     const handleSave = () => { handleClose(); };
 
     const handleSubmit = () => {
         stores.forEach(store => {
-            if (store.id==id&&store.password === password) {
+            if (store.id == id && store.password === password) {
                 setIsManager(true);
             }
         });
@@ -59,20 +62,22 @@ export default function Products() {
         <>
             <Navbar />
             {showAlert && <CustomAlert />}
-           {!isManager&& <Button onClick={() => setShowPass(true)} >כניסת מנהל</Button>}
-            {showPass &&!isManager&& <div>
+            {!isManager && <Button onClick={() => setShowPass(true)} >כניסת מנהל</Button>}
+            {showPass && !isManager && <div>
                 <TextField label="סיסמה" type="password" variant="outlined" onChange={(e) => setPassword(e.target.value)}
                 />
                 <Button onClick={() => handleSubmit()} type="submit">כניסה</Button>
-            </div> }
-            {isManager&&<Button onClick={() => { nav('/addProduct/' + id) }}>הוספת מוצר</Button> }            <div className='product'>
+            </div>}
+            {isManager && <Button onClick={() => { nav('/addProduct/' + id) }}>הוספת מוצר</Button>}
+
+            <div className='product'>
                 {Array.isArray(products) && products.length > 0 && products?.map(product => (
                     <div className='mycard' key={product.id}>
                         <button onClick={() => { addToCart(product) }} className='plus'> +</button>
                         <CardMedia
                             className='productImg'
                             component="img"
-                            image={product.imgFile}
+                            image={product.urlImage}
                             alt={product.name}
                             style={{ width: '40%', height: '25vh', objectFit: 'cover' }}
                         />
@@ -91,7 +96,7 @@ export default function Products() {
                                 </Typography>
                             </div>
                             {/* <button onClick={() => nav('/productEdit')}>edit</button> */}
-                            {isManager&&<Button onClick={() => handleEdit(product.id)}>עריכה</Button>}
+                            {isManager && <Button onClick={() => handleEdit(product.id)}>עריכה</Button>}
 
                         </CardContent>
                     </div>

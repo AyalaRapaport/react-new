@@ -13,6 +13,7 @@ export const getUserDetailsById = createAsyncThunk(
     async (id) => {
         try {
             const response = await axios.get(`https://localhost:7229/api/User/${id}`);
+            console.log(response.status);
             if (response.status === 200) {
                 let user = response.data;
                 const latitude = user.xCoordinate;
@@ -43,15 +44,15 @@ export const addUser = createAsyncThunk(
     async (user) => {
         try {
             const isExist = await axios.get(`https://localhost:7229/api/Courier/${user.idUser}`);
-            if(isExist.status===200)
-            return true;
+            if (isExist.status === 200)
+                return true;
             const response = await axios.post('https://localhost:7229/api/User', {
                 idUser: user.idUser,
                 XCoordinate: user.XCoordinate,
                 YCoordinate: user.YCoordinate,
                 Name: user.Name,
                 Email: user.Email,
-                Password:user.Password
+                Password: user.Password
             });
             if (response.status === 200) {
                 return response.data;

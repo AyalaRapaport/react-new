@@ -11,7 +11,7 @@ const Categories = () => {
     const nav = useNavigate();
 
     const filter = (categoryId) => {
-        nav('/filterCategory/'+categoryId);
+        nav('/filterCategory/' + categoryId);
     }
 
     return (<>
@@ -21,7 +21,7 @@ const Categories = () => {
                     <CardMedia
                         className='categoryImg'
                         component="img"
-                        image={category.imgFile}
+                        image={category.urlImage}
                         alt={category.name}
                         style={{ width: '100%', height: '20vh', objectFit: 'cover' }}
                     />

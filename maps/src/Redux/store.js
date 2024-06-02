@@ -20,27 +20,28 @@ const reducers = {
   categories: categorySlice,
   inCart: cartSlice,
   stores: storeSlice,
-  orders:orderSlice
+  orders: orderSlice
 }
 const rootReducer = combineReducers(reducers);
 
 const persistConfig = {
   key: 'root',
-  storage:sessionStorage,
-  whitelist: ['couriers', 'users','categories'],
- 
+  storage: sessionStorage,
+  whitelist: ['couriers', 'users', 'categories'],
+
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 export const store = configureStore({
   reducer: persistedReducer,
-  middleware:(getdefaultMiddleware)=>
-    getdefaultMiddleware({
-      serializableCheck:{
-        ignoreActions:[FLUSH,REHYDRATE,PAUSE,PERSIST,PURGE,REGISTER],       
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
-    })
+    }),
+
 });
 
 export const persistor = persistStore(store);

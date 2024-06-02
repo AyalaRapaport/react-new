@@ -2,8 +2,6 @@ import * as React from 'react';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import Grid from '@mui/material/Grid';
 import Container from '@mui/material/Container';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
@@ -14,7 +12,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addUser, getUserDetailsById } from '../Redux/userSlice';
 import { StandaloneSearchBox } from '@react-google-maps/api';
 import Navbar from './Navbar';
-import { Formik, Form, Field, ErrorMessage } from 'formik';
+import { Formik, Form } from 'formik';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { useNavigate } from 'react-router-dom';
@@ -95,7 +93,6 @@ const SignUp = () => {
       if (response.data.results[0]) {
         const { lat, lng } = response.data.results[0].geometry.location;
         if (lat && lng) {
-          // if (lat > 33.7 && lat < 36.3 && lng > 29.3 && lng < 33.5) {
           if (lat > 29.3 && lat < 33.7 && lng > 33.5 && lng < 36.3) {
             console.log(lat, lng);
             setLatitude(lat);
@@ -145,9 +142,7 @@ const SignUp = () => {
                 <TextField margin="normal" fullWidth id="password" label="password " type='password' name="password" autoComplete="password"
                   {...formik.getFieldProps('password')} error={formik.errors.password} helperText={formik.touched.password && formik.errors.password}
                 />
-                {/* <TextField margin="normal" fullWidth name="password" label="password" type="password" id="password"
-                  {...formik.getFieldProps('password')} error={formik.touched.password && formik.errors.password} helperText={formik.touched.password && formik.errors.password}
-                /> */}
+               
                 <StandaloneSearchBox
                   onLoad={(ref) => (searchBox.current = ref)}
                 >
@@ -156,10 +151,6 @@ const SignUp = () => {
                   />
                 </StandaloneSearchBox>
                 <TextField margin="normal" fullWidth name="name" label="name" type="name" id="name" autoComplete="name" {...formik.getFieldProps('name')} error={formik.touched.name && formik.errors.name} helperText={formik.touched.name && formik.errors.name}
-                />
-                <FormControlLabel
-                  control={<Checkbox value="remember" color="primary" />}
-                  label="Remember me"
                 />
                 <Button disabled={!formik.isValid} type="submit" fullWidth variant="contained" sx={{ mt: 3, mb: 2, bgcolor: '#00c4e7' }}>
                   הרשמה </Button>

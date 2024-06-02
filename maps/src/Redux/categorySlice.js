@@ -24,8 +24,8 @@ export const addCategory = createAsyncThunk(
                 }
             });
 
-            const img = await axios.get(`https://localhost:7229/api/Product/getImage/${category.Image.name}`)
-            response.data = { ...response.data, imgFile: img.data }
+            // const img = await axios.get(`https://localhost:7229/api/Product/getImage/${category.Image.name}`)
+            // response.data = { ...response.data, imgFile: img.data }
             return response.data;
         } catch (error) {
             console.log(error);
@@ -61,12 +61,11 @@ export const getCategory = createAsyncThunk(
     async () => {
         try {
             const response = await axios.get('https://localhost:7229/api/Category');
-            let categories = response.data;
             if (response.status === 200) {
-                for (let index = 0; index < categories.length; index++) {
-                    const img = await axios.get(`https://localhost:7229/api/Category/getImage/${categories[index].urlImage}`)
-                    categories[index] = { ...categories[index], imgFile: img.data }
-                }
+                // for (let index = 0; index < categories.length; index++) {
+                //     const img = await axios.get(`https://localhost:7229/api/Category/getImage/${categories[index].urlImage}`)
+                //     categories[index] = { ...categories[index], imgFile: img.data }
+                // }
                 // console.log(response.data);
                 return response.data;
             }

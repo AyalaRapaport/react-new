@@ -15,10 +15,10 @@ export const getProduct = createAsyncThunk(
             const response = await axios.get('https://localhost:7229/api/Product');
             let products = response.data;
             if (response.status === 200) {
-                for (let index = 0; index < products.length; index++) {
-                    const img = await axios.get(`https://localhost:7229/api/Product/getImage/${products[index].urlImage}`)
-                    products[index] = { ...products[index], imgFile: img.data }
-                }
+                // for (let index = 0; index < products.length; index++) {
+                //     const img = await axios.get(`https://localhost:7229/api/Product/getImage/${products[index].urlImage}`)
+                //     products[index] = { ...products[index], imgFile: img.data }
+                // }
                 return response.data;
             }
         } catch (error) {
@@ -67,14 +67,15 @@ export const addProduct = createAsyncThunk(
             formData.append('CategoryId', product.CategoryId);
             formData.append('StoreId', product.StoreId.storeId);
             formData.append('Image', product.Image);
-
+            console.log(typeof(product.Image),product.Image);
+            debugger
             let response = await axios.post(`https://localhost:7229/api/Product`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data'
                 }
             });
-            const img = await axios.get(`https://localhost:7229/api/Product/getImage/${product.Image.name}`)
-            response.data={...response.data,imgFile: img.data}
+            // const img = await axios.get(`https://localhost:7229/api/Product/getImage/${product.Image.name}`)
+            // response.data={...response.data,imgFile: img.data}
             return response.data;
         } catch (error) {
             console.log(error);
@@ -100,7 +101,7 @@ export const updateProduct = createAsyncThunk(
                 }
             });
             const img = await axios.get(`https://localhost:7229/api/Product/getImage/${product.Image.name}`)
-            response.data={...response.data,imgFile: img.data,id: product.Id}
+            response.data = { ...response.data, imgFile: img.data, id: product.Id }
             return response.data;
             // response.data = { ...response.data, id: product.Id }
         } catch (error) {

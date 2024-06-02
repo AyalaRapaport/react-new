@@ -17,7 +17,7 @@ export const getOrders = createAsyncThunk(
         try {
             const response = await axios.get(`${url}/Order`);
             if (response.status === 200) {
-                let orders = response.data;
+                let orders = response.data.filter(order => !order.isTaken);
                 console.log(orders);
                 for (let i = 0; i < orders.length; i++) {
                     const latitude = orders[i].xCoordinate;
@@ -44,24 +44,34 @@ export const getOrders = createAsyncThunk(
     }
 );
 
-// export const setOrder = createAsyncThunk(
-//     'setOrder',
-//     async (order) => {
-//         const response = await axios.put(`${url}/Order/${order.Id}`, {
-//             IdCourier: courier.IdCourier,
-//             XCoordinate: courier.XCoordinate,
-//             YCoordinate: courier.YCoordinate,
-//             Name: courier.Name,          
-//         });
-//         return response;
-//     }
-// );
+export const setOrder = createAsyncThunk(
+    'setOrder',
+    async (order) => {
+        try {
+            const response = await axios.put(`${url}/Order/${order.id}`, {
+                xCoordinate: order.xCoordinate,
+                yCoordinate: order.yCoordinate,
+                orderingName: order.orderingName,
+                storeId: order.storeId,
+                orderDate: order.orderDate,
+                isTaken: true,
+                isDone: order.isDone,
+                // productsIds: order.products,
+                userId: order.userId,
+                user: order.user,
+            });
+            return response;
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+);
 
 export const addOrder = createAsyncThunk(
     'addOrder',
     async (order) => {
-
-        try {       
+        try {
             const response = await axios.post(`${url}/Order`, {
                 xCoordinate: order.xCoordinate,
                 yCoordinate: order.yCoordinate,
@@ -70,8 +80,12 @@ export const addOrder = createAsyncThunk(
                 orderDate: order.orderDate,
                 isTaken: order.isTaken,
                 isDone: order.isDone,
+                productsIds: order.products,
+                userId: order.userId,
+                user: order.user,
             });
             if (response.status === 200) {
+                debugger
                 return response.data;
             }
         }
@@ -109,33 +123,23 @@ export const orderSlice = createSlice({
                         xStore: store.xCoordinate, yStore: store.yCoordinate
                     })
                 })
-
-                //             state.orders.forEach(async (order) => {
-                //                 const store = order.store;
-                //                 console.log(store.xCoordinate);
-                //                 const latitude = store.xCoordinate;
-                //                 const longitude = store.yCoordinate;
-                //                 debugger
-                //                 let geocodingApiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&result_type=street_address&key=${apiKey}`;
-                //                 await fetch(geocodingApiUrl)
-                //                     .then(response => response.json())
-                //                     .then(data => {
-                //                         if (data.status === 'OK') {
-                //                             let storeAddress = data.results[0].formatted_address;
-                //                             state.ordersAddresses.push({
-                //                                 storeAddress: storeAddress, xStore: store.xCoordinate, yStore: store.yCoordinate, lat: order.xCoordinate,
-                //                                 lng: order.yCoordinate, id: order.id, address: order.address
-                //                             });
-                //                         } else {
-                //                             console.error('Error fetching address');
-                //                         }
-                //                     })
-                //                     .catch(error => console.error('Error fetching address:', error));
-
-                //             });
-                //             console.log(state.ordersAddresses);
             }
         });
+        builder.addCase(setOrder.fulfilled, (state, action) => {
+            const updatedNearbyLocations = state.nearbyLocations.map(location => {
+                const updatedOrders = location.orders.map(order => {
+                    if (order.id === action.payload.id) {
+                        return { ...order, isTaken: true };
+                    }
+                    return order;
+                });
+
+                return { ...location, orders: updatedOrders };
+            });
+
+            state.nearbyLocations = updatedNearbyLocations;
+        });
+
     },
 });
 

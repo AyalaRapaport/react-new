@@ -1,7 +1,7 @@
 /*global google*/
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { addNearbyLocations, getOrders } from "../Redux/orderSlice";
+import { addNearbyLocations, getOrders, setOrder } from "../Redux/orderSlice";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
@@ -11,18 +11,19 @@ import Checkbox from '@mui/material/Checkbox';
 import { Button } from "@mui/material";
 import Navbar from "./Navbar";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 const OrdersLocation = () => {
     const dispatch = useDispatch();
     const nearbyLocations = useSelector(state => state.orders.nearbyLocations);
     const ordersAddresses = useSelector(state => state.orders.ordersAddresses);
     const storesAddresses = useSelector(state => state.orders.storesAddresses);
+    const orders = useSelector(state => state.orders.orders);
     const x = useSelector(state => state.addresses.currentXCoordinate);
     const y = useSelector(state => state.addresses.currentYCoordinate);
     //courier location
     const singleLocation = { lat: x, lng: y };
     const [showMap, setShowMap] = useState(false);
-    // const [isOrders, setIsOrders] = useState(false);
     const [checked, setChecked] = useState([]);
     const [lat, setLat] = useState(0);
     const [lng, setLng] = useState(0);
@@ -30,23 +31,70 @@ const OrdersLocation = () => {
     const [yStore, setYStore] = useState(0);
     const [formatAddressS, setFormatAddressS] = useState([]);
     const [multChoice, setMultChoice] = useState(false);
+    const [idOrder, setIdOrder] = useState(0)
     const apiKey = useSelector(state => state.addresses.apiKey);
-    // const distancesMatrix = [];
+    const nav=useNavigate();
 
     useEffect(() => {
         dispatch(getOrders())
     }, []);
 
-    useEffect(() => {
-        if (ordersAddresses.length > 0) {
-            // console.log(ordersAddresses);
-            getNearbyLocations(singleLocation, storesAddresses, ordersAddresses);
+    // useEffect(() => {
+    //     if (isChoose) {
+    //         dispatch(setOrder())
+    //     }
+    // }, [isChoose]);
+    const takeOrder = () => {
+        const order = orders.find(x => x.id == idOrder)
+        dispatch(setOrder(order));
+        nav('/homePage');
+    }
+
+    const fetchTravelTime = async (origin, destination) => {
+        try {
+            const originString = `${origin.x},${origin.y}`;
+            const destinationString = `${destination.x},${destination.y}`;
+            console.log(originString);
+            console.log(destinationString);
+            // const url = `https://maps.googleapis.com/maps/api/directions/json?origins=${originString}&destinations=${destinationString}&key=${apiKey}&mode=driving`;
+            const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+            const url = `${proxyUrl}https://maps.googleapis.com/maps/api/directions/json?origin=${originString}&destination=${destinationString}&key=${apiKey}&mode=driving`;
+            console.log(url);
+            const response = await axios.get(url);
+            const data = response.data;
+
+            if (data.status === 'OK') {
+                const durationInSeconds = data.routes[0].legs[0].duration.value;
+
+                // You can also retrieve other information like distance
+                const distanceInMeters = data.routes[0].legs[0].distance.value;
+
+                // Calculate the total travel time in seconds
+                const travelTimeInSeconds = parseFloat(durationInSeconds);
+
+                // Optionally, you can calculate the distance in kilometers
+                const distanceInKilometers = parseFloat(distanceInMeters) / 1000;
+                return durationInSeconds / 60;
+            }
+        } catch (error) {
+            throw new Error("Failed to get a response from the Google Maps API.");
         }
-    }, [ordersAddresses]);
+    };
 
     useEffect(() => {
-        if (nearbyLocations.length > 0&&x&&y) {
-            
+        const fetchData = async () => {
+            if (ordersAddresses.length > 0) {
+                await getNearbyLocations(singleLocation, storesAddresses, ordersAddresses);
+            }
+        };
+
+        fetchData();
+    }, [ordersAddresses]);
+
+
+    useEffect(() => {
+        if (nearbyLocations.length > 0 && x && y) {
+
             nearbyLocations.forEach(async location => {
                 let geocodingApiUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${location.stores.xStore},${location.stores.yStore}&result_type=street_address&key=${apiKey}`;
                 await fetch(geocodingApiUrl)
@@ -54,36 +102,31 @@ const OrdersLocation = () => {
                     .then(data => {
                         if (data.status === 'OK') {
                             setFormatAddressS(prevState => [...prevState, data.results[0].formatted_address]);
-                            // location.stores = { ...location.stores, address: data.results[0].formatted_address }
                         } else {
                             console.error('Error fetching address');
                         }
                     })
                     .catch(error => console.error('Error fetching address:', error));
             });
-            const locations = [];
-            nearbyLocations.forEach((location, i) => {
-                locations.push({ XStore: location.stores.xStore,YStore:location.stores.yStore,XDestination:location.orders.lat,
-                    YDestination:location.orders.lng ,IdOrder:location.orders.id,AddressOrder:location.orders.address,
-                    CurrentX:x,CurrentY:y
-                });
-            });
-            try {
-                console.log(locations);
-              const response = axios.post('https://localhost:7229/api/Locations', locations);
-                
-            } catch (error) {
-                console.log(error);
-            }
+            // const locations = [];
+            // nearbyLocations.forEach((location, i) => {
+            //     locations.push({ XStore: location.stores.xStore,YStore:location.stores.yStore,XDestination:location.orders.lat,
+            //         YDestination:location.orders.lng ,IdOrder:location.orders.id,AddressOrder:location.orders.address,
+            //         CurrentX:x,CurrentY:y
+            //     });
+            // });
+        }
+    }, [nearbyLocations, x, y])
 
-       }
-    }, [nearbyLocations,x,y])
-
-    function getNearbyLocations(singleLocation, storesAddresses, multipleLocations) {
+    async function getNearbyLocations(singleLocation, storesAddresses, multipleLocations) {
         for (let i = 0; i < multipleLocations.length; i++) {
             const distance = calculateDistance(singleLocation, storesAddresses[i], multipleLocations[i]);
             if (distance <= 20) {
-                dispatch(addNearbyLocations({ stores: storesAddresses[i], orders: multipleLocations[i] }));
+                const travelTime1 = await fetchTravelTime({ x: singleLocation.lat, y: singleLocation.lng }, { x: storesAddresses[i].xStore, y: storesAddresses[i].yStore });
+                const travelTime2 = await fetchTravelTime({ x: storesAddresses[i].xStore, y: storesAddresses[i].yStore }, { x: multipleLocations[i].lat, y: multipleLocations[i].lng });
+                const time = travelTime1 + travelTime2;
+                 //const time = 0;
+                dispatch(addNearbyLocations({ stores: storesAddresses[i], orders: multipleLocations[i], time: time }));
             }
         }
     }
@@ -123,13 +166,15 @@ const OrdersLocation = () => {
         return degrees * Math.PI / 180;
     }
 
-    const handleToggle = async (value, lat, lng, xStore, yStore) => {
+    const handleToggle = async (value, lat, lng, xStore, yStore, id) => {
+        setIdOrder(id);
         const currentIndex = checked.indexOf(value);
         const newChecked = [...checked];
         if (!multChoice) {
             if (currentIndex !== -1) {
                 newChecked.splice(currentIndex, 1);
                 setShowMap(false);
+                setIdOrder(0)
             } else {
                 newChecked.splice(0, newChecked.length, value);
                 setShowMap(true);
@@ -159,6 +204,7 @@ const OrdersLocation = () => {
 
     useEffect(() => {
         if (showMap && !multChoice) {
+            debugger
             const directionsService = new window.google.maps.DirectionsService();
             const start = new window.google.maps.LatLng(x, y);
             const end1 = new window.google.maps.LatLng(xStore, yStore);
@@ -209,23 +255,25 @@ const OrdersLocation = () => {
                                 <div>
                                     <p>מכתובת {formatAddressS[index]}</p>
                                     <p>לכתובת {location.orders.address}</p>
+                                    {/* <p>זמן משוער: {Math.floor(location.time)} דקות</p> */}
                                 </div>
                             </ListItemText>
 
-
                             <ListItemIcon>
                                 <Checkbox edge="end" checked={checked.indexOf(index) !== -1}
-                                    onChange={() => { handleToggle(index, location.orders.lat, location.orders.lng, location.stores.xStore, location.stores.yStore); }}
+                                    onChange={() => { handleToggle(index, location.orders.lat, location.orders.lng, location.stores.xStore, location.stores.yStore, location.orders.id); }}
                                     inputProps={{ 'aria-labelledby': `checkbox-list-label-${index}` }} />
                             </ListItemIcon>
                         </ListItemButton>
                     </ListItem>
                 )) : <ListItem><ListItemText primary="אין הזמנות באזורך" /></ListItem>}
             </List >
-            {nearbyLocations?.length > 0 && !multChoice && <Button onClick={() => { setMultChoice(true); setChecked([]); setShowMap(false) }}>אפשר בחירה מרובה</Button>
-            }
-            {nearbyLocations?.length > 0 && multChoice && <Button onClick={() => { setMultChoice(false); setChecked([]) }}>בטל בחירה מרובה</Button>}
-            {showMap && <div id="map" style={{ width: '100%', height: '400px' }}></div>}        </>
+            {/* {nearbyLocations?.length > 0 && !multChoice && <Button onClick={() => { setMultChoice(true); setChecked([]); setShowMap(false) }}>אפשר בחירה מרובה</Button>
+            } */}
+            {idOrder !== 0 && <Button onClick={() => { takeOrder(); }}>  לקיחת הזמנה</Button>}
+            {/* {nearbyLocations?.length > 0 && multChoice && <Button onClick={() => { setMultChoice(false); setChecked([]) }}>בטל בחירה מרובה</Button>} */}
+            {showMap && <div id="map" style={{ width: '100%', height: '400px' }}></div>}
+        </>
     );
 }
 

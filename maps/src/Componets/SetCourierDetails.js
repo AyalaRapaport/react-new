@@ -6,12 +6,14 @@ import ChooseLocation from './ChooseLocation';
 import { useParams } from 'react-router-dom';
 import { getDetails, setDetails } from '../Redux/courierSlice';
 import { useDispatch, useSelector } from 'react-redux';
+import { StandaloneSearchBox } from '@react-google-maps/api';
 
 const SetCourierDetails = () => {
     // const addressFormat = useSelector(state=>state.couriers.currentCourier);
     const refName = useRef();
     const refEmail = useRef();
     const refPhone = useRef();
+    const refPassword = useRef();
     const [isCorrect, setIsCorrect] = useState(false);
     const [isAddressValid, setIsAddressValid] = useState(false);
     const [isValidEmail, setIsValidEmail] = useState(false);
@@ -24,7 +26,9 @@ const SetCourierDetails = () => {
     const statusAddress = useSelector(state => state.addresses.statusAddress);
     const dispatch = useDispatch();
     const address = useSelector(state => state.addresses.address);
-    const apiKey = useSelector(state => state.addresses.apiKey)
+    const apiKey = useSelector(state => state.addresses.apiKey);
+    const searchBox = useRef();
+    const inputRef = useRef();
     const [courier, setCourier] = useState({
         IdCourie: "",
         IsActive: false,
@@ -33,7 +37,8 @@ const SetCourierDetails = () => {
         Name: "",
         Email: "",
         Phone: "",
-        Date: ""
+        Date: "",
+        Password: ""
     });
 
     useEffect(() => {
@@ -58,7 +63,9 @@ const SetCourierDetails = () => {
         if (statusAddress)
             getAddressCoordinates();
     }, [statusAddress, address]);
-
+    useEffect(() => {
+        console.log(details);
+    }, [details])
 
     const HandleConfirmation = () => {
         const isNameValid = /^[A-Za-zא-ת\s]+$/u.test(refName.current.value) && refName.current.value.length > 1;
@@ -78,15 +85,44 @@ const SetCourierDetails = () => {
                 Name: refName.current.value,
                 Email: refEmail.current.value,
                 Phone: refPhone.current.value,
-                lastShipment: details.lastShipment
+                lastShipment: details.lastShipment,
+                Password: refPassword.current.value
+
             });
             setIsCorrect(true);
         }
         else {
             setIsCorrect(false);
-           if(!isAddressValid) alert('בחר כתובת מהרשימה')
+            if (!isAddressValid) alert('בחר כתובת מהרשימה')
         }
     }
+
+    const checkAddress = async (inputRef) => {
+        try {
+            const response = await axios.get(
+                `https://maps.googleapis.com/maps/api/geocode/json?address=${inputRef}&key=${apiKey}`
+            );
+            if (response.data.results[0]) {
+                const { lat, lng } = response.data.results[0].geometry.location;
+                if (lat && lng) {
+                    if (lat > 29.3 && lat < 33.7 && lng > 33.5 && lng < 36.3) {
+                        setLatitude(lat);
+                        setLongitude(lng);
+                    }
+                    else {
+                        alert('בחר כתובת בישראל');
+                        setLatitude(0);
+                        setLongitude(0);
+                    }
+                }
+            }
+        }
+        catch (error) {
+            alert('בחר כתובת קיימת מישראל');
+            console.error("Error getting coordinates:", error);
+        }
+    }
+
     useEffect(() => {
         if (isCorrect) {
             console.log(courier);
@@ -124,8 +160,14 @@ const SetCourierDetails = () => {
                             {!isValidPhoneNumber && isConfirm && (
                                 <span className="error-message">מספר טלפון לא תקין</span>
                             )}
+                            <label><i className="fa fa-envelope"></i> ססמא</label>
+                            <input defaultValue={details.password} ref={refPassword} type="text" />
                             <label> כתובת</label>
-                            <ChooseLocation address={details.address} />
+                            {/* <ChooseLocation address={details.address} /> */}
+                            <StandaloneSearchBox onLoad={(ref) => (searchBox.current = ref)} >
+                                <input onBlur={() => checkAddress(inputRef.current.value)} className="inpSearch" ref={inputRef} type="text" placeholder="בחר כתובת" autoComplete="on"
+                                />
+                            </StandaloneSearchBox>
                             <input className="btn" type='button' value={"אישור"} onClick={HandleConfirmation} />
                             <div className="row">
                             </div>
@@ -134,7 +176,7 @@ const SetCourierDetails = () => {
                 </div>
             )}
             {isCorrect && (
-                <div>
+                <div style={{textAlign:"center"}}>
                     <h3>השינוים נשמרו </h3>
                     <p>פרטייך נשמרו במערכת,ניתן לשנותם באיזור האישי</p>
                     <p>בכל שעה שתרצה ניתן להכנס לאיזור האישי ולצפות במשלוחים באזורך</p>

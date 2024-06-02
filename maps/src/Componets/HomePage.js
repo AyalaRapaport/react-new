@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import css from '../Css/HomePage.css'
-import background from '../Assets/Images/1.jpg'
+import '../Css/HomePage.css'
 import Categories from './Categories';
 import Stores from './Stores';
 import Navbar from './Navbar';
@@ -22,7 +21,6 @@ const HomePage = () => {
             for (let i = 0; i < stores.length; i++) {
                 const distance = calculateDistance({ lat: user.xCoordinate, lng: user.yCoordinate }, { xStore: stores[i].xCoordinate, yStore: stores[i].yCoordinate });
                 if (distance <= 15) {
-                    console.log(stores[i]);
                     dispatch(addStoreNearby(stores[i]));
                 }
             }
@@ -36,7 +34,6 @@ const HomePage = () => {
     }
 
     function calculateDistance(location1, location2) {
-        //distance to store
         const earthRadius = 6371;
         const lat1 = toRadians(location1.lat);
         const lon1 = toRadians(location1.lng);
@@ -52,11 +49,8 @@ const HomePage = () => {
         const distance = earthRadius * c;
         return distance;
     }
-    useEffect(()=>{
-        console.log("j"+currentUser?.id);
-    },[currentUser])
+   
     return (<>
-        <link href={css} rel="stylesheet" />
         <Navbar />
         <div id='back'>
             <img alt='background' id='background' src={process.env.PUBLIC_URL + 'backwolt.png'} />
@@ -65,8 +59,8 @@ const HomePage = () => {
                     <>
                         <p id='text'>היי {user.name} </p>
                         <p id='text'>{user.address}</p>
-                        {!showNearby && <Button onClick={() => shopsNearby()}>חנויות באזורך</Button>}
-                        {showNearby && <Button onClick={() => shopsNearby()}>הצגת כל החנויות </Button>}
+                        {!showNearby && <button  id='storeBtn' onClick={() => shopsNearby()}>חנויות באזורך</button>}
+                        {showNearby && <button  id='storeBtn' onClick={() => shopsNearby()}>הצגת כל החנויות </button>}
                     </>
                 }
             </div>

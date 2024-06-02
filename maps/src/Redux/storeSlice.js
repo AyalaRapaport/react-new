@@ -45,12 +45,12 @@ export const getStores = createAsyncThunk(
             let stores = response.data;
             if (response.status === 200) {
                 for (let index = 0; index < stores.length; index++) {
-                    const img = await axios.get(`https://localhost:7229/api/Store/getImage/${stores[index].urlImage}`)
-                    stores[index] = { ...stores[index], imgFile: img.data }
-                    for (let i = 0; i < stores[index].productList.length; i++) {
-                        const imgP = await axios.get(`https://localhost:7229/api/Product/getImage/${stores[index].productList[i].urlImage}`)
-                        stores[index].productList[i] = { ...stores[index].productList[i], imgFile: imgP.data }
-                    }
+                    // const img = await axios.get(`https://localhost:7229/api/Store/getImage/${stores[index].urlImage}`)
+                    // stores[index] = { ...stores[index], imgFile: img.data }
+                    // for (let i = 0; i < stores[index].productList.length; i++) {
+                    //     const imgP = await axios.get(`https://localhost:7229/api/Product/getImage/${stores[index].productList[i].urlImage}`)
+                    //     stores[index].productList[i] = { ...stores[index].productList[i], imgFile: imgP.data }
+                    // }
                 }
                 for (let j = 0; j < stores.length; j++) {
                     const latitude = stores[j].xCoordinate;
@@ -110,7 +110,7 @@ export const storeSlice = createSlice({
                         image: action.payload.image,
                     };
 
-                    products[index] = updatedProduct; 
+                    products[index] = updatedProduct;
                     draftState.productLists[action.payload.storeId] = [...products];
                 }
             });
@@ -124,7 +124,7 @@ export const storeSlice = createSlice({
                 stores: [...state.stores, action.payload]
             };
         });
-        
+
         builder.addCase(getStores.fulfilled, (state, action) => {
             state.status = 'fulfilled';
             state.stores = action.payload;

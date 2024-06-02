@@ -40,7 +40,7 @@ const Stores = ({ categoryId, showNearby }) => {
                     <CardMedia
                         className='storeImg'
                         component="img"
-                        image={store.imgFile}
+                        image={store.urlImage}
                         alt={store.name}
                         style={{ width: '100%', height: '25vh', objectFit: 'cover' }}
                     />

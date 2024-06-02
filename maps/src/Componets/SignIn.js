@@ -34,11 +34,16 @@ export default function SignIn() {
     event.preventDefault();
     const data = new FormData(event.currentTarget);
     const id = data.get('id');
+    const password = data.get('password');
     if (alignment === 'שליח') {
       dispatch(getDetailsById(id))
         .then((res) => {
-          if (res.payload)
-            nav('/delivers');
+          if (res.payload) {
+            if (!(res.payload.password == password))
+              alert('ססמא שגויה')
+            else
+              nav('/delivers');
+          }
           else alert('אינך רשום כשליח');
         })
         .catch(() => {
@@ -48,8 +53,12 @@ export default function SignIn() {
     else {
       dispatch(getUserDetailsById(data.get('id')))
         .then((res) => {
-          if (res.payload)
-            nav('/homepage')
+          if (res.payload) {
+            if (!(res.payload.password === password))
+              alert('ססמא שגויה')
+            else
+              nav('/homepage')
+          }
           else alert('אינך רשום');
         })
         .catch(() => {
@@ -103,22 +112,21 @@ export default function SignIn() {
                 margin="normal"
                 required
                 fullWidth
-                id="email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
+                name="id"
+                label="תעודת זהות"
+                type="id"
+                id="id"
               />
               <TextField
                 margin="normal"
                 required
                 fullWidth
-                name="id"
-                label="id"
-                type="id"
-                id="id"
-                autoComplete="current-password"
-              // ref={refId}
+                id="password"
+                label="הקש ססמא"
+                name="password"
+                autoComplete="password"
               />
+
 
               <Button
                 type="submit"

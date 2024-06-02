@@ -73,7 +73,6 @@ export const getDetailsById = createAsyncThunk(
 export const setDetails = createAsyncThunk(
     'setDetails',
     async (courier) => {
-        debugger
         try {
             const response = await axios.put(`https://localhost:7229/api/Courier/${courier.IdCourier}`, {
                 IdCourier: courier.IdCourier,
@@ -83,7 +82,8 @@ export const setDetails = createAsyncThunk(
                 Name: courier.Name,
                 Email: courier.Email,
                 Phone: courier.Phone,
-                LastShipment: courier.Date
+                LastShipment: courier.Date,
+                Password:courier.Password
             });
             if (response.status === 200) {
                 return response.data;
@@ -133,6 +133,9 @@ export const courierSlice = createSlice({
         builder.addCase(getDetails.fulfilled, (state, action) => {
             state.status = 'fulfilled'
             state.details = action.payload
+        })
+        builder.addCase(setDetails.fulfilled, (state, action) => {
+            state.currentCourier = action.payload
         })
         builder.addCase(getDetailsById.fulfilled, (state, action) => {
             state.status = 'fulfilled'
